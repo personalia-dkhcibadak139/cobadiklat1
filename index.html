@@ -3044,13 +3044,24 @@ function renderAdminKaryawan() {
       <div style="font-size:.78rem;color:#555;line-height:1.6;">
         Klik atau drag &amp; drop file Excel<br>
         <strong style="color:#27AE60;">.xlsx / .xls</strong><br>
-        Urutan kolom: <strong>A=Nama, B=Bagian, C=Unit, D=Jabatan, E=Tgl Masuk (YYYY-MM-DD)</strong>
+        <table style="margin-top:6px;font-size:.75rem;border-collapse:collapse;text-align:left;">
+          <tr><td style="color:#e86b1a;font-weight:700;padding-right:8px;">A</td><td>Nama Karyawan <span style="color:#e53935;">*wajib</span></td></tr>
+          <tr><td style="color:#e86b1a;font-weight:700;padding-right:8px;">B</td><td>Bagian</td></tr>
+          <tr><td style="color:#e86b1a;font-weight:700;padding-right:8px;">C</td><td>Unit</td></tr>
+          <tr><td style="color:#e86b1a;font-weight:700;padding-right:8px;">D</td><td>Jabatan</td></tr>
+          <tr><td style="color:#e86b1a;font-weight:700;padding-right:8px;">E</td><td>Tgl Masuk <span style="color:#888;">(DD/MM/YYYY)</span></td></tr>
+        </table>
+        <div style="margin-top:6px;color:#aaa;">Baris header otomatis dikenali &amp; dilewati</div>
       </div>
     </div>
 
-    <div class="kar-divider"></div>
+    <div style="margin-top:6px;">
+      <button onclick="karDownloadTemplate()" style="background:none;border:1.5px solid #27AE60;color:#27AE60;border-radius:7px;padding:6px 14px;font-size:.78rem;cursor:pointer;width:100%;">
+        📥 Download Template Excel
+      </button>
+    </div>
 
-    <div class="kar-section-title">➕ Tambah Karyawan</div>
+    <div class="kar-divider"></div>
     <div class="kar-form-grid">
       <input class="full-col" type="text" id="karNamaInput" placeholder="Nama lengkap karyawan *">
       ${karDDHtml('karBagian', KAR_BAGIAN, 'Pilih Bagian *')}
@@ -3121,6 +3132,32 @@ function karHandleFile(e) {
   if(f) karProcessFile(f);
 }
 
+// Konversi serial date Excel → string "YYYY-MM-DD"
+function karExcelDateToISO(val) {
+  if (!val) return null;
+  const s = String(val).trim();
+  // Sudah format ISO atau dd/mm/yyyy
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+    const [d,m,y] = s.split('/');
+    return `${y}-${m}-${d}`;
+  }
+  if (/^\d{2}-\d{2}-\d{4}$/.test(s)) {
+    const [d,m,y] = s.split('-');
+    return `${y}-${m}-${d}`;
+  }
+  // Serial number Excel (contoh: 45291)
+  const num = Number(val);
+  if (!isNaN(num) && num > 1000) {
+    const date = new Date(Math.round((num - 25569) * 86400 * 1000));
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2,'0');
+    const d = String(date.getUTCDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  return null;
+}
+
 function karProcessFile(file) {
   if(!window.XLSX) { karShowStatus('error','❌ Library Excel belum dimuat.'); return; }
   if(!sbReady()) { karShowStatus('error','⚠️ Supabase belum dikonfigurasi.'); return; }
@@ -3128,30 +3165,65 @@ function karProcessFile(file) {
   const reader = new FileReader();
   reader.onload = async function(ev) {
     try {
-      const wb   = XLSX.read(ev.target.result, {type:'array'});
+      const wb   = XLSX.read(ev.target.result, {type:'array', cellDates: false});
       const ws   = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+      // Deteksi & skip baris header (baris pertama yg kolom A-nya bukan nama orang)
+      const HEADER_KEYWORDS = ['nama','name','karyawan','no','no.','nomor'];
+      let startRow = 0;
+      if (rows.length > 0) {
+        const firstCell = String(rows[0][0]||'').trim().toLowerCase();
+        if (HEADER_KEYWORDS.some(k => firstCell.includes(k)) || firstCell === '') {
+          startRow = 1;
+        }
+      }
+
       const existingNames = karCache.map(k => k.nama.toLowerCase());
       const toInsert = [];
-      let skipped = 0;
-      rows.forEach(r => {
-        const nama      = String(r[0]||'').trim();
-        const bagian    = String(r[1]||'').trim();
-        const unit      = String(r[2]||'').trim();
-        const jabatan   = String(r[3]||'').trim();
-        const tgl_masuk = String(r[4]||'').trim() || null;
-        if(nama.length < 2) return;
-        if(existingNames.includes(nama.toLowerCase())) { skipped++; return; }
-        toInsert.push({ nama, bagian, unit, jabatan, tanggal_masuk: tgl_masuk, aktif: true });
+      let skipped = 0, invalid = 0;
+
+      rows.slice(startRow).forEach((r, i) => {
+        const nama    = String(r[0]||'').trim();
+        const bagian  = String(r[1]||'').trim().toUpperCase();
+        const unit    = String(r[2]||'').trim().toUpperCase();
+        const jabatan = String(r[3]||'').trim().toUpperCase();
+        const tgl_raw = r[4];
+        const tgl_masuk = karExcelDateToISO(tgl_raw);
+
+        if (nama.length < 2) { invalid++; return; }
+        if (existingNames.includes(nama.toLowerCase())) { skipped++; return; }
+
+        toInsert.push({
+          nama,
+          bagian:  bagian  || null,
+          unit:    unit    || null,
+          jabatan: jabatan || null,
+          tanggal_masuk: tgl_masuk,
+          aktif: true
+        });
         existingNames.push(nama.toLowerCase());
       });
-      if(toInsert.length === 0) {
-        karShowStatus('error', `⚠️ Semua nama sudah ada (${skipped} duplikat).`);
+
+      if (toInsert.length === 0) {
+        const msg = skipped > 0
+          ? `⚠️ Semua ${skipped} nama sudah ada di database (duplikat).`
+          : '⚠️ Tidak ada data valid ditemukan di file.';
+        karShowStatus('error', msg);
         return;
       }
-      karShowStatus('loading', `⏳ Menyimpan ${toInsert.length} karyawan…`);
+
+      // Preview singkat sebelum simpan
+      const preview = toInsert.slice(0,3).map(k=>k.nama).join(', ');
+      const more = toInsert.length > 3 ? ` (+${toInsert.length-3} lainnya)` : '';
+      karShowStatus('loading', `⏳ Menyimpan ${toInsert.length} karyawan: ${preview}${more}…`);
+
       await sbFetch('karyawan', { method:'POST', body: JSON.stringify(toInsert) });
-      karShowStatus('success', `✅ ${toInsert.length} karyawan ditambahkan, ${skipped} duplikat diabaikan.`);
+
+      let msg = `✅ ${toInsert.length} karyawan berhasil ditambahkan.`;
+      if (skipped)  msg += ` ${skipped} duplikat diabaikan.`;
+      if (invalid)  msg += ` ${invalid} baris kosong dilewati.`;
+      karShowStatus('success', msg);
       document.getElementById('karFileInput').value = '';
       document.getElementById('karUploadArea').classList.remove('show');
       await karLoadFromDB();
@@ -3192,6 +3264,31 @@ async function karAddManual() {
     await karLoadFromDB();
   } catch(err) {
     karShowStatus('error','❌ Gagal menyimpan: ' + err.message);
+  }
+}
+
+function karDownloadTemplate() {
+  if (window.XLSX) {
+    const wsData = [
+      ['Nama Karyawan', 'Bagian', 'Unit', 'Jabatan', 'Tanggal Masuk'],
+      ['Contoh: Budi Santoso', 'KEPERAWATAN', 'ICU', 'PERAWAT', '01/01/2020'],
+      ['Contoh: Siti Rahayu', 'PENUNJANG MEDIS', 'LABORATORIUM', 'ANALIS', '15/03/2019'],
+    ];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [{wch:30},{wch:25},{wch:25},{wch:30},{wch:18}];
+    // Style header (bold) — XLSX.js basic
+    XLSX.utils.book_append_sheet(wb, ws, 'Karyawan');
+    XLSX.writeFile(wb, 'Template_Upload_Karyawan_DKH.xlsx');
+  } else {
+    // Fallback CSV
+    const csv = 'Nama Karyawan,Bagian,Unit,Jabatan,Tanggal Masuk\n' +
+      '"Contoh: Budi Santoso","KEPERAWATAN","ICU","PERAWAT","01/01/2020"\n';
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Template_Upload_Karyawan_DKH.csv';
+    a.click();
   }
 }
 
