@@ -511,6 +511,37 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
   padding:6px 12px; font-size:.75rem; cursor:pointer; width:100%;
 }
 
+/* ===== SASARAN PESERTA SMART FILTER ===== */
+.sas-mode-row{display:flex;gap:6px;margin-bottom:10px;}
+.sas-mode-btn{flex:1;padding:7px 10px;border:1.5px solid #ddd;border-radius:8px;background:#fff;color:#888;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .18s;font-family:'Poppins',sans-serif;}
+.sas-mode-btn.active{background:#fff5ee;border-color:#e86b1a;color:#e86b1a;}
+.sas-filter-section{background:#fafafa;border:1.5px solid #eee;border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.sas-filter-group{margin-bottom:10px;}
+.sas-filter-group:last-child{margin-bottom:0;}
+.sas-filter-label{font-size:.72rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'Montserrat',sans-serif;}
+.sas-chips{display:flex;flex-wrap:wrap;gap:5px;min-height:28px;}
+.sas-chip{padding:4px 11px;border-radius:20px;font-size:.75rem;font-weight:600;border:1.5px solid #ddd;background:#fff;color:#555;cursor:pointer;transition:all .15s;user-select:none;font-family:'Poppins',sans-serif;white-space:nowrap;}
+.sas-chip:hover{border-color:#e86b1a;color:#e86b1a;background:#fff8f2;}
+.sas-chip.selected{background:#e86b1a;border-color:#e86b1a;color:#fff;}
+.sas-chip-empty{font-size:.75rem;color:#ccc;font-style:italic;padding:4px 0;}
+.sas-preview-wrap{border:1.5px solid #ffe5c8;border-radius:10px;background:#fff8f2;overflow:hidden;margin-bottom:8px;}
+.sas-preview-header{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:#fff0e0;border-bottom:1px solid #ffe0c0;font-size:.78rem;font-weight:700;color:#e86b1a;}
+.sas-reset-btn{background:none;border:none;color:#e86b1a;font-size:.75rem;cursor:pointer;padding:2px 6px;}
+.sas-preview-list{max-height:200px;overflow-y:auto;padding:6px 0;}
+.sas-preview-item{display:flex;align-items:center;padding:4px 12px;font-size:.8rem;color:#333;border-bottom:1px solid #fff0e0;gap:4px;}
+.sas-preview-item:last-child{border-bottom:none;}
+.sas-preview-item .sas-num{color:#ccc;font-size:.72rem;min-width:22px;}
+.sas-preview-item .sas-name{flex:1;}
+.sas-preview-item .sas-meta{font-size:.7rem;color:#bbb;}
+.sas-preview-item .sas-del{background:none;border:none;color:#e53935;font-size:.7rem;cursor:pointer;padding:1px 5px;opacity:.6;margin-left:4px;}
+.sas-preview-item .sas-del:hover{opacity:1;}
+.sas-add-row{display:flex;gap:6px;padding:8px 12px;border-top:1px solid #ffe0c0;}
+.sas-add-input{flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:.82rem;outline:none;font-family:'Poppins',sans-serif;}
+.sas-add-input:focus{border-color:#e86b1a;}
+.sas-add-btn{background:#e86b1a;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap;}
+.sas-empty-hint{font-size:.78rem;color:#bbb;font-style:italic;text-align:center;padding:10px 0;display:block;}
+/* ===== END SASARAN FILTER ===== */
+
 /* ===== INPUT PESERTA TAB ===== */
 .inp-section { margin-bottom: 18px; }
 .inp-section-title {
@@ -984,6 +1015,22 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
 .iht-status.success { background: #e8f5e9; color: #2e7d32; }
 .iht-status.error   { background: #ffebee; color: #c62828; }
 .iht-status.loading { background: #e3f2fd; color: #1565c0; }
+
+/* Narasumber autocomplete */
+.iht-nara-wrap { position: relative; }
+.iht-nara-list {
+  display: none; position: absolute; top: calc(100% + 3px); left: 0; right: 0;
+  background: #fff; border: 1.5px solid #e86b1a; border-radius: 8px;
+  max-height: 200px; overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 999;
+}
+.iht-nara-list.open { display: block; }
+.iht-nara-option {
+  padding: 8px 12px; font-size: .83rem; cursor: pointer;
+  color: #333; transition: background .1s; font-family: 'Poppins', sans-serif;
+}
+.iht-nara-option:hover { background: #fff3e0; color: #e86b1a; }
+.iht-nara-empty { padding: 10px 12px; font-size: .78rem; color: #aaa; font-style: italic; }
 
 /* ===== TTD PANEL ===== */
 .ttd-overlay {
@@ -2540,12 +2587,193 @@ function toggleMenuCalendar() {
   }
 }
 
+// ===== SASARAN PESERTA SMART FILTER =====
+let sasMode = 'filter';           // 'filter' | 'manual'
+let sasSelectedBagian  = new Set();
+let sasSelectedUnit    = new Set();
+let sasSelectedJabatan = new Set();
+let sasFinalList = [];             // [{nama, bagian, unit, jabatan, source}]
+let sasManualExtra = [];           // nama yang ditambah manual dalam mode filter
+
+// Ganti mode (filter | manual)
+function sasSwitchMode(mode) {
+  sasMode = mode;
+  document.getElementById('sasModeFilter').classList.toggle('active', mode === 'filter');
+  document.getElementById('sasModeManual').classList.toggle('active', mode === 'manual');
+  document.getElementById('sasFilterBlock').style.display = mode === 'filter' ? 'block' : 'none';
+  document.getElementById('sasManualBlock').style.display = mode === 'manual' ? 'block' : 'none';
+}
+
+// Render chip-chip filter dari data master
+function sasRenderChips() {
+  const renderGroup = (containerId, items, selectedSet, type) => {
+    const wrap = document.getElementById(containerId);
+    if (!wrap) return;
+    if (!items || items.length === 0) {
+      wrap.innerHTML = '<span class="sas-chip-empty">— belum ada data —</span>';
+      return;
+    }
+    wrap.innerHTML = items.map(item =>
+      `<div class="sas-chip${selectedSet.has(item) ? ' selected' : ''}" 
+            onclick="sasToggleChip('${type}','${escAttr(item)}')">${escHtml(item)}</div>`
+    ).join('');
+  };
+  renderGroup('sasChipsBagian',  KAR_BAGIAN,  sasSelectedBagian,  'bagian');
+  renderGroup('sasChipsUnit',    KAR_UNIT,    sasSelectedUnit,    'unit');
+  renderGroup('sasChipsJabatan', KAR_JABATAN, sasSelectedJabatan, 'jabatan');
+}
+
+function sasToggleChip(type, val) {
+  const map = { bagian: sasSelectedBagian, unit: sasSelectedUnit, jabatan: sasSelectedJabatan };
+  const set = map[type];
+  if (set.has(val)) set.delete(val); else set.add(val);
+  sasRenderChips();
+  sasApplyFilter();
+}
+
+// Terapkan filter ke karCache → hasilkan sasFinalList
+function sasApplyFilter() {
+  const anyFilter = sasSelectedBagian.size || sasSelectedUnit.size || sasSelectedJabatan.size;
+  const hintEl    = document.getElementById('sasEmptyHint');
+  const prevWrap  = document.getElementById('sasPreviewWrap');
+
+  if (!anyFilter && sasManualExtra.length === 0) {
+    hintEl.style.display = 'block';
+    prevWrap.style.display = 'none';
+    sasFinalList = [];
+    return;
+  }
+
+  hintEl.style.display = 'none';
+
+  // Karyawan yang cocok dengan filter aktif (OR antar kategori, AND dalam 1 karyawan hanya perlu cocok salah satu)
+  const fromFilter = karCache.filter(k => {
+    const matchBagian  = sasSelectedBagian.size  === 0 || (k.bagian  && sasSelectedBagian.has(k.bagian.toUpperCase()));
+    const matchUnit    = sasSelectedUnit.size    === 0 || (k.unit    && sasSelectedUnit.has(k.unit.toUpperCase()));
+    const matchJabatan = sasSelectedJabatan.size === 0 || (k.jabatan && sasSelectedJabatan.has(k.jabatan.toUpperCase()));
+    // Jika ada filter aktif, karyawan harus cocok dengan SEMUA filter yang aktif (AND logic)
+    const checks = [];
+    if (sasSelectedBagian.size)  checks.push(matchBagian);
+    if (sasSelectedUnit.size)    checks.push(matchUnit);
+    if (sasSelectedJabatan.size) checks.push(matchJabatan);
+    return checks.length === 0 || checks.every(Boolean);
+  });
+
+  // Gabung dengan manual extra, deduplicate by nama
+  const allNames = new Set(fromFilter.map(k => k.nama.toLowerCase()));
+  sasFinalList = fromFilter.map(k => ({
+    nama: k.nama,
+    bagian: k.bagian || '',
+    unit: k.unit || '',
+    jabatan: k.jabatan || '',
+    source: 'filter'
+  }));
+  sasManualExtra.forEach(nama => {
+    if (!allNames.has(nama.toLowerCase())) {
+      sasFinalList.push({ nama, bagian: '', unit: '', jabatan: '', source: 'manual' });
+      allNames.add(nama.toLowerCase());
+    }
+  });
+
+  sasRenderPreview();
+  prevWrap.style.display = 'block';
+}
+
+function sasRenderPreview() {
+  const countEl = document.getElementById('sasPreviewCount');
+  const listEl  = document.getElementById('sasPreviewList');
+  countEl.textContent = sasFinalList.length + ' karyawan terpilih';
+  listEl.innerHTML = sasFinalList.map((k, i) => {
+    const meta = [k.unit || k.bagian || k.jabatan].filter(Boolean).join(' · ');
+    return `<div class="sas-preview-item">
+      <span class="sas-num">${i+1}.</span>
+      <span class="sas-name">${escHtml(k.nama)}</span>
+      ${meta ? `<span class="sas-meta">${escHtml(meta)}</span>` : ''}
+      <button class="sas-del" onclick="sasRemoveItem(${i})" title="Hapus dari daftar">✕</button>
+    </div>`;
+  }).join('') || '<div style="padding:8px 12px;font-size:.78rem;color:#bbb;">Tidak ada karyawan yang cocok</div>';
+}
+
+function sasRemoveItem(idx) {
+  const nama = sasFinalList[idx]?.nama;
+  if (!nama) return;
+  // Hapus dari manual extra (jika ada)
+  sasManualExtra = sasManualExtra.filter(n => n.toLowerCase() !== nama.toLowerCase());
+  // Jika dari filter, tambahkan ke "blacklist" manual (exclude)
+  // Simpel: kita rebuild dengan exclude nama ini dari karCache secara permanen session ini
+  // Implementasi: tambahkan ke Set sasExcluded
+  if (!window.sasExcluded) window.sasExcluded = new Set();
+  window.sasExcluded.add(nama.toLowerCase());
+  sasFinalList.splice(idx, 1);
+  sasRenderPreview();
+  document.getElementById('sasPreviewCount').textContent = sasFinalList.length + ' karyawan terpilih';
+}
+
+function sasAddManual() {
+  const inp = document.getElementById('sasAddInput');
+  const nama = inp.value.trim();
+  if (!nama) return;
+  const alreadyIn = sasFinalList.some(k => k.nama.toLowerCase() === nama.toLowerCase());
+  if (!alreadyIn) {
+    sasManualExtra.push(nama);
+    sasApplyFilter();
+  }
+  inp.value = '';
+  inp.focus();
+}
+
+function sasResetFilter() {
+  sasSelectedBagian.clear();
+  sasSelectedUnit.clear();
+  sasSelectedJabatan.clear();
+  sasManualExtra = [];
+  sasFinalList = [];
+  if (window.sasExcluded) window.sasExcluded.clear();
+  sasRenderChips();
+  document.getElementById('sasEmptyHint').style.display = 'block';
+  document.getElementById('sasPreviewWrap').style.display = 'none';
+}
+
+// Kembalikan nilai sasaran untuk disimpan ke DB (teks + daftar nama JSON)
+function sasGetValue() {
+  if (sasMode === 'manual') {
+    return document.getElementById('ihtSasaran')?.value?.trim() || '';
+  }
+  if (sasFinalList.length === 0) return '';
+  // Buat label ringkas dari filter aktif
+  const labels = [];
+  if (sasSelectedBagian.size)  labels.push([...sasSelectedBagian].join(', '));
+  if (sasSelectedUnit.size)    labels.push([...sasSelectedUnit].join(', '));
+  if (sasSelectedJabatan.size) labels.push([...sasSelectedJabatan].join(', '));
+  const prefix = labels.length ? labels.join(' | ') : 'Filter Karyawan';
+  return prefix + ' (' + sasFinalList.length + ' karyawan)';
+}
+
+// Init chip saat tab IHT dibuka — panggil setelah renderAdminIHT
+function sasInitFilter() {
+  sasSelectedBagian.clear();
+  sasSelectedUnit.clear();
+  sasSelectedJabatan.clear();
+  sasManualExtra = [];
+  sasFinalList = [];
+  if (window.sasExcluded) window.sasExcluded.clear();
+  sasMode = 'filter';
+  sasRenderChips();
+  document.getElementById('sasEmptyHint').style.display = 'block';
+  document.getElementById('sasPreviewWrap').style.display = 'none';
+  document.getElementById('sasFilterBlock').style.display = 'block';
+  document.getElementById('sasManualBlock').style.display = 'none';
+  document.getElementById('sasModeFilter').classList.add('active');
+  document.getElementById('sasModeManual').classList.remove('active');
+}
+// ===== END SASARAN FILTER =====
+
 // ===== ADMIN TAB IHT =====
 let ihtFlyerFile = null; // simpan file flyer yang dipilih (UI saja, belum upload)
 
 function renderAdminIHT() {
   const el = document.getElementById('adminTabIHT');
-  if (el.innerHTML.trim() !== '') return; // sudah dirender
+  ihtFlyerFile = null; // reset file flyer tiap buka tab
 
   el.innerHTML = `
     <div class="iht-form-wrap">
@@ -2573,7 +2801,11 @@ function renderAdminIHT() {
 
         <div class="iht-field">
           <label class="iht-label">Narasumber</label>
-          <input type="text" id="ihtNarasumber" class="iht-input" placeholder="Nama narasumber / fasilitator">
+          <div class="iht-nara-wrap" id="ihtNarasumberWrap">
+            <input type="text" id="ihtNarasumber" class="iht-input" placeholder="Ketik nama atau cari dari data karyawan…" autocomplete="off" spellcheck="false">
+            <div class="iht-nara-list" id="ihtNarasumberList"></div>
+          </div>
+          <div style="font-size:10px;color:#bbb;margin-top:4px;">💡 Bisa ketik nama bebas atau pilih dari daftar karyawan</div>
         </div>
       </div>
 
@@ -2600,10 +2832,65 @@ function renderAdminIHT() {
           <input type="text" id="ihtTempat" class="iht-input" placeholder="Contoh: Aula Lantai 3 DKH Hospitals Cibadak">
         </div>
 
+        <!-- ===== SASARAN PESERTA SMART FILTER ===== -->
         <div class="iht-field">
           <label class="iht-label">Sasaran Peserta</label>
-          <input type="text" id="ihtSasaran" class="iht-input" placeholder="Contoh: Seluruh tenaga keperawatan">
+
+          <!-- Chip mode toggle -->
+          <div class="sas-mode-row" id="sasModeRow">
+            <button class="sas-mode-btn active" id="sasModeFilter" onclick="sasSwitchMode('filter')">
+              🔍 Filter Karyawan
+            </button>
+            <button class="sas-mode-btn" id="sasModeManual" onclick="sasSwitchMode('manual')">
+              ✏️ Teks Manual
+            </button>
+          </div>
+
+          <!-- MODE: Filter -->
+          <div id="sasFilterBlock">
+
+            <!-- Filter pills: Bagian / Unit / Jabatan -->
+            <div class="sas-filter-section">
+              <div class="sas-filter-group" id="sasGrpBagian">
+                <div class="sas-filter-label">🏢 Bagian</div>
+                <div class="sas-chips" id="sasChipsBagian"></div>
+              </div>
+              <div class="sas-filter-group" id="sasGrpUnit">
+                <div class="sas-filter-label">🔬 Unit</div>
+                <div class="sas-chips" id="sasChipsUnit"></div>
+              </div>
+              <div class="sas-filter-group" id="sasGrpJabatan">
+                <div class="sas-filter-label">💼 Jabatan</div>
+                <div class="sas-chips" id="sasChipsJabatan"></div>
+              </div>
+            </div>
+
+            <!-- Preview karyawan terpilih -->
+            <div class="sas-preview-wrap" id="sasPreviewWrap" style="display:none">
+              <div class="sas-preview-header">
+                <span id="sasPreviewCount">0 karyawan terpilih</span>
+                <button class="sas-reset-btn" onclick="sasResetFilter()">✕ Reset</button>
+              </div>
+              <div class="sas-preview-list" id="sasPreviewList"></div>
+              <!-- Tambah / hapus manual dalam mode filter -->
+              <div class="sas-add-row">
+                <input type="text" id="sasAddInput" class="sas-add-input" placeholder="+ Tambah nama manual…" autocomplete="off">
+                <button class="sas-add-btn" onclick="sasAddManual()">Tambah</button>
+              </div>
+            </div>
+
+            <div class="sas-empty-hint" id="sasEmptyHint">
+              ☝️ Pilih filter di atas untuk memuat daftar karyawan secara otomatis
+            </div>
+          </div>
+
+          <!-- MODE: Manual text -->
+          <div id="sasManualBlock" style="display:none">
+            <input type="text" id="ihtSasaran" class="iht-input" placeholder="Contoh: Seluruh tenaga keperawatan">
+            <div style="font-size:10px;color:#bbb;margin-top:4px;">💡 Ketik deskripsi sasaran bebas. Daftar peserta bisa ditambah di tab Input nanti.</div>
+          </div>
         </div>
+        <!-- ===== END SASARAN PESERTA ===== -->
       </div>
 
       <!-- SECTION 3: Upload Flyer -->
@@ -2652,6 +2939,68 @@ function renderAdminIHT() {
     const f = e.dataTransfer.files[0];
     if (f) previewIhtFlyer(f);
   });
+
+  // Init autocomplete narasumber dari data karyawan
+  ihtInitNarasumber();
+
+  // Init smart filter sasaran peserta
+  // Pastikan master referensi sudah dimuat (karCache dan KAR_UNIT dll)
+  if (KAR_UNIT.length === 0 && KAR_BAGIAN.length === 0) {
+    loadMasterReferensi().then(() => sasInitFilter());
+  } else {
+    sasInitFilter();
+  }
+}
+
+function ihtInitNarasumber() {
+  const inputEl = document.getElementById('ihtNarasumber');
+  const listEl  = document.getElementById('ihtNarasumberList');
+  const wrap    = document.getElementById('ihtNarasumberWrap');
+  if (!inputEl || !listEl) return;
+
+  function getOptions(q) {
+    // Ambil dari karCache (karyawan aktif), filter duplikat nama
+    const names = [...new Set(karCache.map(k => k.nama))].sort();
+    if (!q) return names;
+    return names.filter(n => n.toLowerCase().includes(q.toLowerCase()));
+  }
+
+  function renderList(q) {
+    const opts = getOptions(q);
+    if (opts.length === 0) {
+      listEl.innerHTML = '<div class="iht-nara-empty">Tidak ditemukan di data karyawan</div>';
+    } else {
+      listEl.innerHTML = opts.map(n =>
+        `<div class="iht-nara-option" data-val="${escHtml(n)}">${escHtml(n)}</div>`
+      ).join('');
+      listEl.querySelectorAll('.iht-nara-option').forEach(opt => {
+        opt.addEventListener('mousedown', e => {
+          e.preventDefault();
+          inputEl.value = opt.dataset.val;
+          listEl.classList.remove('open');
+        });
+      });
+    }
+  }
+
+  inputEl.addEventListener('focus', () => {
+    renderList(inputEl.value);
+    listEl.classList.add('open');
+  });
+  inputEl.addEventListener('input', () => {
+    renderList(inputEl.value);
+    listEl.classList.add('open');
+  });
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Escape') listEl.classList.remove('open');
+    if (e.key === 'Enter') {
+      const first = listEl.querySelector('.iht-nara-option');
+      if (first) { inputEl.value = first.dataset.val; listEl.classList.remove('open'); }
+    }
+  });
+  document.addEventListener('mousedown', e => {
+    if (!wrap.contains(e.target)) listEl.classList.remove('open');
+  }, true);
 }
 
 function handleIhtFlyer(e) {
@@ -2709,7 +3058,8 @@ async function submitIhtForm() {
   const tanggalPelaksanaan = document.getElementById('ihtTanggalPelaksanaan').value;
   const jam              = document.getElementById('ihtJam').value;
   const tempat           = document.getElementById('ihtTempat').value.trim();
-  const sasaran          = document.getElementById('ihtSasaran').value.trim();
+  const sasaran = sasGetValue();
+  // jika mode filter, sasFinalList berisi daftar nama peserta yang sudah bisa langsung ditambah ke registrasi
 
   // Validasi wajib
   if (!tanggalDiklat)       { showIhtStatus('error', '❌ Tanggal diklat wajib diisi.'); return; }
@@ -2718,7 +3068,7 @@ async function submitIhtForm() {
   if (!tanggalPelaksanaan)  { showIhtStatus('error', '❌ Tanggal pelaksanaan wajib diisi.'); return; }
   if (!jam)                 { showIhtStatus('error', '❌ Jam pelaksanaan wajib diisi.'); return; }
   if (!tempat)              { showIhtStatus('error', '❌ Tempat wajib diisi.'); return; }
-  if (!sasaran)             { showIhtStatus('error', '❌ Sasaran peserta wajib diisi.'); return; }
+  if (!sasaran)             { showIhtStatus('error', '❌ Sasaran peserta wajib diisi. Pilih filter atau isi manual.'); return; }
 
   // Simulasi simpan (fungsi backend belum aktif)
   const btn = document.getElementById('ihtSubmitBtn');
@@ -2754,11 +3104,33 @@ async function submitIhtForm() {
     });
 
     showIhtStatus('success', '✅ IHT "' + judulDiklat + '" berhasil disimpan!' + (flyerUrl ? ' Flyer terupload ✓' : ''));
+
+    // Jika mode filter dan ada daftar peserta, otomatis daftarkan ke registrasi
+    if (sasMode === 'filter' && sasFinalList.length > 0) {
+      showIhtStatus('loading', '⏳ Mendaftarkan ' + sasFinalList.length + ' karyawan sebagai peserta...');
+      try {
+        const rows = sasFinalList.map(k => ({ tanggal: tanggalPelaksanaan, nama: k.nama }));
+        // Kirim dalam batch (max 500 per request agar tidak overload)
+        for (let i = 0; i < rows.length; i += 500) {
+          await sbFetch('registrasi', {
+            method: 'POST',
+            body: JSON.stringify(rows.slice(i, i + 500))
+          });
+        }
+        showIhtStatus('success', '✅ IHT tersimpan + ' + sasFinalList.length + ' peserta otomatis terdaftar!');
+      } catch(e2) {
+        showIhtStatus('success', '✅ IHT tersimpan. Catatan: pendaftaran peserta gagal (' + e2.message + '). Silakan tambah manual via tab Input.');
+      }
+    }
     btn.disabled = false;
     // Reset form
     ['ihtTanggalDiklat','ihtJudulDiklat','ihtNarasumber',
-     'ihtTanggalPelaksanaan','ihtJam','ihtTempat','ihtSasaran']
-      .forEach(id => document.getElementById(id).value = '');
+     'ihtTanggalPelaksanaan','ihtJam','ihtTempat']
+      .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    // Reset sasaran
+    sasResetFilter();
+    const sasManualInp = document.getElementById('ihtSasaran');
+    if (sasManualInp) sasManualInp.value = '';
     removeIhtFlyer();
     // ✅ Reload kalender agar tanggal IHT langsung berwarna orange
     await loadIhtDataDB();
