@@ -3949,6 +3949,9 @@ async function submitIhtForm() {
 
     // Simpan ke tabel iht_data
     showIhtStatus('loading', '⏳ Menyimpan ke database...');
+    const sasaranNames = (sasMode === 'filter' && sasFinalList.length > 0)
+      ? JSON.stringify(sasFinalList.map(k => k.nama))
+      : null;
     await sbFetch('iht_data', {
       method: 'POST',
       body: JSON.stringify({
@@ -3959,6 +3962,7 @@ async function submitIhtForm() {
         jam:                 jam,
         tempat:              tempat,
         sasaran:             sasaran,
+        sasaran_names:       sasaranNames,
         flyer_url:           flyerUrl,
         kuota:               ihtKuota === 0 ? 999 : ihtKuota
       })
@@ -5021,28 +5025,170 @@ async function renderAdminDashboardIHT() {
       </table>
     </div>
 
-    <!-- Modal Edit Jam Diklat -->
-    <div id="dashJamModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
-      <div style="background:#fff;border-radius:16px;padding:24px;width:90%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:13px;color:#1a1a2e;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">✏️ Edit Jam Diklat</div>
-        <div id="dashJamModalJudul" style="font-size:.82rem;color:#888;margin-bottom:18px;"></div>
-        <div style="display:flex;gap:12px;margin-bottom:20px;">
-          <div style="flex:1;">
-            <label style="display:block;font-size:.72rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Jam</label>
-            <input type="number" id="dashJamInput" min="0" max="99" value="0"
-              style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:1.2rem;font-weight:800;text-align:center;outline:none;font-family:'Montserrat',sans-serif;box-sizing:border-box;"
-              onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+    <!-- Modal Edit IHT Lengkap -->
+    <div id="dashJamModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;align-items:flex-end;justify-content:center;backdrop-filter:blur(5px);">
+      <div style="background:#fff;border-radius:20px 20px 0 0;padding:0;width:100%;max-width:600px;box-shadow:0 -8px 40px rgba(0,0,0,0.25);max-height:92vh;display:flex;flex-direction:column;">
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#1a1a2e,#2d2d4e);border-radius:20px 20px 0 0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+          <div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:13px;color:#fff;text-transform:uppercase;letter-spacing:1.5px;">✏️ Edit Data IHT</div>
+            <div id="dashJamModalJudul" style="font-size:.75rem;color:rgba(255,255,255,0.55);margin-top:2px;"></div>
           </div>
-          <div style="flex:1;">
-            <label style="display:block;font-size:.72rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Menit</label>
-            <input type="number" id="dashMenitInput" min="0" max="59" value="0"
-              style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:1.2rem;font-weight:800;text-align:center;outline:none;font-family:'Montserrat',sans-serif;box-sizing:border-box;"
-              onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
-          </div>
+          <button onclick="dashCloseJamModal()" style="background:rgba(255,255,255,0.12);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
         </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="dashSaveJam()" style="flex:1;background:#e86b1a;color:#fff;border:none;border-radius:10px;padding:11px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'Montserrat',sans-serif;">💾 Simpan</button>
-          <button onclick="dashCloseJamModal()" style="flex:1;background:#f5f5f5;color:#555;border:none;border-radius:10px;padding:11px;font-size:.88rem;font-weight:600;cursor:pointer;">Batal</button>
+        <!-- Scrollable body -->
+        <div style="overflow-y:auto;padding:18px 20px 8px;flex:1;">
+          <!-- Judul Diklat -->
+          <div style="margin-bottom:14px;">
+            <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">📋 Judul Diklat</label>
+            <input type="text" id="editJudul"
+              style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:.9rem;font-weight:600;outline:none;font-family:'Poppins',sans-serif;box-sizing:border-box;"
+              onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+          </div>
+          <!-- Tanggal & Status -->
+          <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <div style="flex:1;">
+              <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">📅 Tanggal</label>
+              <input type="date" id="editTanggal"
+                style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:.88rem;outline:none;font-family:'Poppins',sans-serif;box-sizing:border-box;"
+                onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+            </div>
+            <div style="flex:1;">
+              <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">🏷️ Status</label>
+              <select id="editStatus"
+                style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:.88rem;outline:none;font-family:'Poppins',sans-serif;box-sizing:border-box;background:#fff;"
+                onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+                <option value="belum">⏳ Belum</option>
+                <option value="selesai">✅ Selesai</option>
+              </select>
+            </div>
+          </div>
+          <!-- Tempat -->
+          <div style="margin-bottom:14px;">
+            <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">📍 Tempat / Lokasi</label>
+            <input type="text" id="editTempat" placeholder="Contoh: Aula Lt. 3, Ruang Rapat, Online…"
+              style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;box-sizing:border-box;"
+              onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+          </div>
+          <!-- Narasumber dengan autocomplete karyawan -->
+          <div style="margin-bottom:14px;">
+            <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">👤 Narasumber / Fasilitator</label>
+            <div style="position:relative;" id="editNarasumberWrap">
+              <input type="text" id="editNarasumber" placeholder="Ketik nama atau cari dari karyawan…" autocomplete="off" spellcheck="false"
+                style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;box-sizing:border-box;"
+                onfocus="editNaraOpen()" oninput="editNaraFilter(this.value)"
+                onblur="this.style.borderColor='#ffe0c0'" onfocus2="this.style.borderColor='#e86b1a'">
+              <div id="editNaraList" style="display:none;position:absolute;top:calc(100% + 3px);left:0;right:0;background:#fff;border:1.5px solid #e86b1a;border-radius:10px;max-height:180px;overflow-y:auto;box-shadow:0 6px 20px rgba(232,107,26,.2);z-index:9500;"></div>
+            </div>
+            <div style="font-size:.68rem;color:#bbb;margin-top:3px;">💡 Ketik bebas atau pilih dari daftar karyawan</div>
+          </div>
+
+          <!-- Sasaran Peserta — full smart filter -->
+          <div style="margin-bottom:6px;">
+            <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🎯 Sasaran Peserta</label>
+
+            <!-- Mode toggle -->
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <button class="sas-mode-btn active" id="esModeFilter" onclick="esSwitchMode('filter')" style="flex:1;padding:7px 10px;border:1.5px solid #e86b1a;border-radius:8px;background:#fff5ee;color:#e86b1a;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">🔍 Filter Karyawan</button>
+              <button class="sas-mode-btn" id="esModeManual" onclick="esSwitchMode('manual')" style="flex:1;padding:7px 10px;border:1.5px solid #ddd;border-radius:8px;background:#fff;color:#888;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">✏️ Teks Manual</button>
+            </div>
+
+            <!-- MODE: Filter -->
+            <div id="esFilterBlock">
+              <div class="sas-filter-section">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:.7rem;color:#bbb;font-style:italic;">Pilih satu atau lebih filter (bisa kombinasi)</span>
+                  <button onclick="esRenderChips()" style="background:none;border:1px solid #eee;border-radius:5px;padding:2px 8px;font-size:.7rem;color:#bbb;cursor:pointer;" title="Muat ulang">🔄</button>
+                </div>
+                <div class="sas-filter-group">
+                  <div class="sas-filter-label">🏢 Bagian</div>
+                  <div class="sas-chips" id="esChipsBagian"></div>
+                </div>
+                <div class="sas-filter-group">
+                  <div class="sas-filter-label">🔬 Unit</div>
+                  <div class="sas-chips" id="esChipsUnit"></div>
+                </div>
+                <div class="sas-filter-group">
+                  <div class="sas-filter-label">💼 Jabatan</div>
+                  <div class="sas-chips" id="esChipsJabatan"></div>
+                </div>
+              </div>
+
+              <!-- Preview karyawan terpilih -->
+              <div class="sas-preview-wrap" id="esPreviewWrap" style="display:none">
+                <div class="sas-preview-header">
+                  <span id="esPreviewCount">0 karyawan terpilih</span>
+                  <button class="sas-reset-btn" onclick="esResetFilter()">✕ Reset</button>
+                </div>
+                <div class="sas-preview-list" id="esPreviewList"></div>
+                <div class="sas-add-row">
+                  <input type="text" id="esAddInput" class="sas-add-input" placeholder="+ Tambah nama manual…" autocomplete="off">
+                  <button class="sas-add-btn" onclick="esAddManual()">Tambah</button>
+                </div>
+              </div>
+              <div class="sas-empty-hint" id="esEmptyHint">☝️ Pilih filter di atas untuk memuat daftar karyawan</div>
+            </div>
+
+            <!-- MODE: Manual text -->
+            <div id="esManualBlock" style="display:none">
+              <input type="text" id="editSasaran" placeholder="Contoh: Seluruh tenaga keperawatan"
+                style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;box-sizing:border-box;"
+                onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+            </div>
+          </div>
+          <!-- Gelombang & Kuota -->
+          <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <div style="flex:1;">
+              <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">🔢 Gelombang</label>
+              <input type="number" id="editGelombang" min="0" max="99" placeholder="0 = tidak ada"
+                style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:1rem;font-weight:700;text-align:center;outline:none;font-family:'Montserrat',sans-serif;box-sizing:border-box;"
+                onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+            </div>
+            <div style="flex:1;">
+              <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">👥 Kuota (0=∞)</label>
+              <input type="number" id="editKuota" min="0" placeholder="0 = tidak dibatasi"
+                style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:1rem;font-weight:700;text-align:center;outline:none;font-family:'Montserrat',sans-serif;box-sizing:border-box;"
+                onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+            </div>
+          </div>
+          <!-- Jam Diklat -->
+          <div style="margin-bottom:6px;">
+            <label style="display:block;font-size:.7rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">⏱️ Durasi Diklat</label>
+            <div style="display:flex;gap:10px;">
+              <div style="flex:1;">
+                <label style="display:block;font-size:.68rem;color:#bbb;text-align:center;margin-bottom:4px;">Jam</label>
+                <input type="number" id="dashJamInput" min="0" max="99" value="0"
+                  style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:1.2rem;font-weight:800;text-align:center;outline:none;font-family:'Montserrat',sans-serif;box-sizing:border-box;"
+                  onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+              </div>
+              <div style="display:flex;align-items:center;padding-top:20px;color:#ccc;font-size:1.2rem;">:</div>
+              <div style="flex:1;">
+                <label style="display:block;font-size:.68rem;color:#bbb;text-align:center;margin-bottom:4px;">Menit</label>
+                <input type="number" id="dashMenitInput" min="0" max="59" value="0"
+                  style="width:100%;padding:10px 12px;border:2px solid #ffe0c0;border-radius:10px;font-size:1.2rem;font-weight:800;text-align:center;outline:none;font-family:'Montserrat',sans-serif;box-sizing:border-box;"
+                  onfocus="this.style.borderColor='#e86b1a'" onblur="this.style.borderColor='#ffe0c0'">
+              </div>
+            </div>
+          </div>
+          <!-- Status save -->
+          <div id="editIhtStatus" style="display:none;padding:8px 12px;border-radius:8px;font-size:.8rem;margin-top:10px;"></div>
+        </div>
+        <!-- Footer tombol -->
+        <div style="padding:12px 20px 20px;flex-shrink:0;border-top:1px solid #f0f0f0;background:#fff;border-radius:0 0 0 0;">
+          <div style="display:flex;gap:8px;">
+            <button onclick="dashSaveJam()"
+              style="flex:2;background:linear-gradient(135deg,#e86b1a,#d4550e);color:#fff;border:none;border-radius:12px;padding:13px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:'Montserrat',sans-serif;letter-spacing:.5px;">
+              💾 Simpan Perubahan
+            </button>
+            <button onclick="dashCloseJamModal()"
+              style="flex:1;background:#f5f5f5;color:#555;border:none;border-radius:12px;padding:13px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">
+              Batal
+            </button>
+          </div>
+          <button onclick="dashHapusIHT()"
+            style="width:100%;margin-top:8px;background:#fff;color:#e53935;border:1.5px solid #ffcdd2;border-radius:12px;padding:11px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;">
+            🗑️ Hapus IHT Ini
+          </button>
         </div>
       </div>
     </div>
@@ -5191,8 +5337,8 @@ async function dashLoadTable() {
         <td style="padding:9px 10px;text-align:center;">${jamLabel}</td>
         <td style="padding:9px 10px;text-align:center;">
           <button onclick="dashOpenJamModal('${r.id}','${escAttr(r.judul_diklat||'')}',${r.jam_diklat_jam||0},${r.jam_diklat_menit||0})"
-            style="background:none;border:1.5px solid #ffe0c0;color:#e86b1a;border-radius:7px;padding:4px 10px;font-size:.72rem;cursor:pointer;font-weight:700;white-space:nowrap;">
-            ✏️ Edit Jam
+            style="background:linear-gradient(135deg,#e86b1a,#d4550e);border:none;color:#fff;border-radius:8px;padding:5px 13px;font-size:.72rem;cursor:pointer;font-weight:700;white-space:nowrap;font-family:'Montserrat',sans-serif;letter-spacing:.5px;">
+            ✏️ Edit
           </button>
         </td>
       </tr>`;
@@ -5203,17 +5349,73 @@ async function dashLoadTable() {
   }
 }
 
-function dashOpenJamModal(id, judul, jam, menit) {
+async function dashOpenJamModal(id, judul, jam, menit) {
   dashEditId    = id;
   dashEditJam   = jam   || 0;
   dashEditMenit = menit || 0;
 
+  // Set judul sementara dulu, lalu fetch data lengkap
   document.getElementById('dashJamModalJudul').textContent = judul;
   document.getElementById('dashJamInput').value   = dashEditJam;
   document.getElementById('dashMenitInput').value = dashEditMenit;
+  // Reset field lain
+  document.getElementById('editJudul').value      = judul || '';
+  document.getElementById('editTanggal').value    = '';
+  document.getElementById('editTempat').value     = '';
+  document.getElementById('editNarasumber').value = '';
+  document.getElementById('editSasaran').value    = '';
+  document.getElementById('editGelombang').value  = '';
+  document.getElementById('editKuota').value      = '';
+  document.getElementById('editStatus').value     = 'belum';
+  document.getElementById('editIhtStatus').style.display = 'none';
 
   const modal = document.getElementById('dashJamModal');
   modal.style.display = 'flex';
+
+  // Init filter sasaran
+  setTimeout(() => {
+    esResetFilter();
+    if (KAR_BAGIAN.length === 0 && KAR_UNIT.length === 0) {
+      loadMasterReferensi().then(esRenderChips).catch(esRenderChips);
+    } else {
+      esRenderChips();
+    }
+    esSwitchMode('filter');
+  }, 50);
+
+  // Fetch data lengkap dari Supabase
+  if (sbReady()) {
+    try {
+      const rows = await sbFetch('iht_data?id=eq.' + id + '&select=*&limit=1');
+      if (rows && rows.length > 0) {
+        const r = rows[0];
+        document.getElementById('editJudul').value      = r.judul_diklat          || '';
+        document.getElementById('editTanggal').value    = r.tanggal_pelaksanaan   ? r.tanggal_pelaksanaan.substring(0,10) : '';
+        document.getElementById('editTempat').value     = r.tempat                || r.lokasi || '';
+        document.getElementById('editNarasumber').value = r.narasumber            || '';
+        const sasaranVal = r.sasaran_peserta || r.sasaran || '';
+        // Coba load daftar nama dari sasaran_names jika ada
+        let sasarNamesRaw = r.sasaran_names;
+        if (sasarNamesRaw && typeof sasarNamesRaw === 'string') {
+          try { sasarNamesRaw = JSON.parse(sasarNamesRaw); } catch(e) { sasarNamesRaw = null; }
+        }
+        if (Array.isArray(sasarNamesRaw) && sasarNamesRaw.length > 0) {
+          // Tampilkan daftar nama langsung di mode filter preview
+          setTimeout(() => esLoadFromNames(sasarNamesRaw), 80);
+        } else if (sasaranVal) {
+          esSetFromString(sasaranVal);
+        }
+        document.getElementById('editGelombang').value  = r.gelombang != null && r.gelombang > 0 ? r.gelombang : '';
+        document.getElementById('editKuota').value      = r.kuota != null && r.kuota !== 999 ? r.kuota : '0';
+        document.getElementById('editStatus').value     = r.status || 'belum';
+        document.getElementById('dashJamInput').value   = r.jam_diklat_jam   || 0;
+        document.getElementById('dashMenitInput').value = r.jam_diklat_menit || 0;
+        document.getElementById('dashJamModalJudul').textContent = r.judul_diklat || judul;
+      }
+    } catch(e) {
+      // Tidak masalah, data awal tetap terisi dari parameter
+    }
+  }
 }
 
 function dashCloseJamModal() {
@@ -5223,25 +5425,344 @@ function dashCloseJamModal() {
 
 async function dashSaveJam() {
   if (!dashEditId) return;
-  const jam   = parseInt(document.getElementById('dashJamInput').value)  || 0;
-  const menit = parseInt(document.getElementById('dashMenitInput').value) || 0;
+  const jam        = parseInt(document.getElementById('dashJamInput').value)   || 0;
+  const menit      = parseInt(document.getElementById('dashMenitInput').value)  || 0;
+  const judul      = document.getElementById('editJudul').value.trim();
+  const tanggal    = document.getElementById('editTanggal').value;
+  const tempat     = document.getElementById('editTempat').value.trim();
+  const narasumber = document.getElementById('editNarasumber').value.trim();
+  const sasaran    = esGetValue();
+  const gelRaw     = document.getElementById('editGelombang').value;
+  const gelombang  = gelRaw !== '' ? (parseInt(gelRaw) || 0) : null;
+  const kuotaRaw   = document.getElementById('editKuota').value;
+  const kuota      = kuotaRaw !== '' ? (parseInt(kuotaRaw) || 0) : 0;
+  const status     = document.getElementById('editStatus').value;
 
   if (menit < 0 || menit > 59) { alert('Menit harus antara 0–59.'); return; }
+  if (!judul) { alert('Judul Diklat tidak boleh kosong.'); return; }
 
   if (!sbReady()) { alert('⚠️ Supabase belum dikonfigurasi.'); return; }
 
+  const statusEl = document.getElementById('editIhtStatus');
+  statusEl.style.display = 'block';
+  statusEl.style.background = '#fff5ee';
+  statusEl.style.color = '#e86b1a';
+  statusEl.textContent = '⏳ Menyimpan…';
+
   try {
+    const payload = {
+      judul_diklat:      judul,
+      tanggal_pelaksanaan: tanggal || null,
+      tempat:            tempat   || null,
+      narasumber:        narasumber || null,
+      sasaran_peserta:   sasaran  || null,
+      sasaran_names:     (esMode === 'filter' && esFinalList.length > 0)
+                           ? JSON.stringify(esFinalList.map(k => k.nama))
+                           : null,
+      gelombang:         gelombang,
+      kuota:             kuota === 0 ? 999 : kuota,
+      status:            status,
+      jam_diklat_jam:    jam,
+      jam_diklat_menit:  menit
+    };
     await sbFetch('iht_data?id=eq.' + dashEditId, {
       method: 'PATCH',
       prefer: 'return=minimal',
-      body: JSON.stringify({ jam_diklat_jam: jam, jam_diklat_menit: menit })
+      body: JSON.stringify(payload)
     });
-    dashCloseJamModal();
-    await dashLoadTable();
+    statusEl.style.background = '#e8f8f0';
+    statusEl.style.color = '#27AE60';
+    statusEl.textContent = '✅ Berhasil disimpan!';
+    setTimeout(() => {
+      dashCloseJamModal();
+      dashLoadTable();
+    }, 700);
   } catch(e) {
-    alert('❌ Gagal menyimpan: ' + e.message);
+    statusEl.style.background = '#ffebee';
+    statusEl.style.color = '#e53935';
+    statusEl.textContent = '❌ Gagal menyimpan: ' + e.message;
   }
 }
+
+async function dashHapusIHT() {
+  if (!dashEditId) return;
+  const judul = document.getElementById('editJudul').value || dashEditId;
+  if (!confirm('Hapus IHT ini secara permanen?\n\n"' + judul + '"\n\nData yang sudah dihapus tidak dapat dikembalikan.')) return;
+  if (!sbReady()) { alert('⚠️ Supabase belum dikonfigurasi.'); return; }
+  const statusEl = document.getElementById('editIhtStatus');
+  statusEl.style.display = 'block';
+  statusEl.style.background = '#fff5ee';
+  statusEl.style.color = '#e86b1a';
+  statusEl.textContent = '⏳ Menghapus…';
+  try {
+    await sbFetch('iht_data?id=eq.' + dashEditId, {
+      method: 'DELETE',
+      prefer: 'return=minimal'
+    });
+    statusEl.style.background = '#e8f8f0';
+    statusEl.style.color = '#27AE60';
+    statusEl.textContent = '✅ IHT berhasil dihapus.';
+    setTimeout(() => {
+      dashCloseJamModal();
+      dashLoadTable();
+    }, 700);
+  } catch(e) {
+    statusEl.style.background = '#ffebee';
+    statusEl.style.color = '#e53935';
+    statusEl.textContent = '❌ Gagal hapus: ' + e.message;
+  }
+}
+
+// ===== EDIT MODAL — NARASUMBER AUTOCOMPLETE =====
+function editNaraOpen() {
+  const inp = document.getElementById('editNarasumber');
+  if (inp) { inp.style.borderColor = '#e86b1a'; editNaraFilter(inp.value); }
+}
+
+function editNaraFilter(q) {
+  const listEl = document.getElementById('editNaraList');
+  if (!listEl) return;
+  const names = [...new Set(karCache.map(k => k.nama))].sort();
+  const filtered = q ? names.filter(n => n.toLowerCase().includes(q.toLowerCase())) : names;
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div style="padding:10px 12px;font-size:.78rem;color:#aaa;font-style:italic;">Tidak ditemukan di data karyawan</div>';
+  } else {
+    listEl.innerHTML = filtered.slice(0, 80).map(n => {
+      const hl = q ? n.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'),
+        '<strong style="color:#e86b1a">$1</strong>') : n;
+      return `<div class="iht-nara-option" data-val="${escHtml(n)}" onmousedown="editNaraSelect('${escAttr(n)}')">${hl}</div>`;
+    }).join('');
+  }
+  listEl.style.display = 'block';
+}
+
+function editNaraSelect(val) {
+  const inp = document.getElementById('editNarasumber');
+  if (inp) inp.value = val;
+  const listEl = document.getElementById('editNaraList');
+  if (listEl) listEl.style.display = 'none';
+}
+
+// Close narasumber dropdown on outside click
+document.addEventListener('mousedown', function(e) {
+  const wrap = document.getElementById('editNarasumberWrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const listEl = document.getElementById('editNaraList');
+    if (listEl) listEl.style.display = 'none';
+  }
+}, true);
+
+// ===== EDIT MODAL — SASARAN FILTER (namespace: es_) =====
+let esSelectedBagian  = new Set();
+let esSelectedUnit    = new Set();
+let esSelectedJabatan = new Set();
+let esManualExtra     = [];
+let esFinalList       = [];
+let esExcluded        = new Set();
+let esMode            = 'filter';
+
+function esSwitchMode(mode) {
+  esMode = mode;
+  const filterBtn  = document.getElementById('esModeFilter');
+  const manualBtn  = document.getElementById('esModeManual');
+  const filterBlock = document.getElementById('esFilterBlock');
+  const manualBlock = document.getElementById('esManualBlock');
+  if (!filterBtn) return;
+  if (mode === 'filter') {
+    filterBtn.style.cssText  = 'flex:1;padding:7px 10px;border:1.5px solid #e86b1a;border-radius:8px;background:#fff5ee;color:#e86b1a;font-size:.8rem;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;';
+    manualBtn.style.cssText  = 'flex:1;padding:7px 10px;border:1.5px solid #ddd;border-radius:8px;background:#fff;color:#888;font-size:.8rem;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;';
+    filterBlock.style.display = 'block';
+    manualBlock.style.display = 'none';
+  } else {
+    manualBtn.style.cssText  = 'flex:1;padding:7px 10px;border:1.5px solid #e86b1a;border-radius:8px;background:#fff5ee;color:#e86b1a;font-size:.8rem;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;';
+    filterBtn.style.cssText  = 'flex:1;padding:7px 10px;border:1.5px solid #ddd;border-radius:8px;background:#fff;color:#888;font-size:.8rem;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;';
+    filterBlock.style.display = 'none';
+    manualBlock.style.display = 'block';
+  }
+}
+
+function esRenderChips() {
+  _esRenderChipGroup('esChipsBagian',  KAR_BAGIAN,  esSelectedBagian);
+  _esRenderChipGroup('esChipsUnit',    KAR_UNIT,    esSelectedUnit);
+  _esRenderChipGroup('esChipsJabatan', KAR_JABATAN, esSelectedJabatan);
+}
+
+function _esRenderChipGroup(containerId, list, selectedSet) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  if (!list || list.length === 0) {
+    wrap.innerHTML = '<span class="sas-chip-empty">— belum ada data —</span>';
+    return;
+  }
+  wrap.innerHTML = list.map(item =>
+    `<div class="sas-chip${selectedSet.has(item) ? ' selected' : ''}"
+      onmousedown="esToggleChip('${containerId}','${escAttr(item)}')">${escHtml(item)}</div>`
+  ).join('');
+}
+
+function esToggleChip(containerId, item) {
+  let set;
+  if (containerId === 'esChipsBagian')  set = esSelectedBagian;
+  if (containerId === 'esChipsUnit')    set = esSelectedUnit;
+  if (containerId === 'esChipsJabatan') set = esSelectedJabatan;
+  if (!set) return;
+  if (set.has(item)) set.delete(item); else set.add(item);
+  esRenderChips();
+  esApplyFilter();
+}
+
+function esApplyFilter() {
+  // Build final list from karCache filtered by selected chips + manualExtra
+  const base = karCache.filter(k => {
+    const inBagian  = esSelectedBagian.size  === 0 || esSelectedBagian.has(k.bagian||'');
+    const inUnit    = esSelectedUnit.size    === 0 || esSelectedUnit.has(k.unit||'');
+    const inJabatan = esSelectedJabatan.size === 0 || esSelectedJabatan.has(k.jabatan||'');
+    const anyActive = esSelectedBagian.size > 0 || esSelectedUnit.size > 0 || esSelectedJabatan.size > 0;
+    return anyActive && inBagian && inUnit && inJabatan;
+  });
+  const baseNames = base.map(k => k.nama);
+  const combined = [...new Set([...baseNames, ...esManualExtra])].filter(n => !esExcluded.has(n));
+  esFinalList = combined.map(nama => {
+    const info = karCache.find(k => k.nama === nama);
+    return info || { nama };
+  });
+  esRenderPreview();
+}
+
+function esRenderPreview() {
+  const wrap   = document.getElementById('esPreviewWrap');
+  const list   = document.getElementById('esPreviewList');
+  const hint   = document.getElementById('esEmptyHint');
+  const count  = document.getElementById('esPreviewCount');
+  if (!wrap) return;
+
+  const anyActive = esSelectedBagian.size > 0 || esSelectedUnit.size > 0 || esSelectedJabatan.size > 0 || esManualExtra.length > 0;
+  if (!anyActive) {
+    wrap.style.display = 'none';
+    if (hint) hint.style.display = 'block';
+    return;
+  }
+  wrap.style.display = 'block';
+  if (hint) hint.style.display = 'none';
+  if (count) count.textContent = esFinalList.length + ' karyawan terpilih';
+  if (list) {
+    list.innerHTML = esFinalList.map((k, i) =>
+      `<div class="sas-preview-item">
+        <span class="sas-num">${i+1}.</span>
+        <span class="sas-name">${escHtml(k.nama)}</span>
+        <span class="sas-meta">${escHtml(k.jabatan||'')}${k.jabatan && k.bagian ? ' · ' : ''}${escHtml(k.bagian||'')}</span>
+        <button class="sas-del" onmousedown="esExclude('${escAttr(k.nama)}')">✕</button>
+      </div>`
+    ).join('');
+  }
+}
+
+function esExclude(nama) {
+  esExcluded.add(nama);
+  esApplyFilter();
+}
+
+function esAddManual() {
+  const inp = document.getElementById('esAddInput');
+  const nama = inp ? inp.value.trim() : '';
+  if (!nama) return;
+  if (!esFinalList.some(k => k.nama.toLowerCase() === nama.toLowerCase())) {
+    esManualExtra.push(nama);
+    esApplyFilter();
+  }
+  if (inp) { inp.value = ''; inp.focus(); }
+}
+
+function esResetFilter() {
+  esSelectedBagian.clear();
+  esSelectedUnit.clear();
+  esSelectedJabatan.clear();
+  esManualExtra = [];
+  esFinalList = [];
+  esExcluded.clear();
+  esRenderChips();
+  const wrap = document.getElementById('esPreviewWrap');
+  const hint = document.getElementById('esEmptyHint');
+  if (wrap) wrap.style.display = 'none';
+  if (hint) hint.style.display = 'block';
+}
+
+function esInitFilter() {
+  esSelectedBagian.clear();
+  esSelectedUnit.clear();
+  esSelectedJabatan.clear();
+  esManualExtra = [];
+  esFinalList = [];
+  esExcluded.clear();
+  esMode = 'filter';
+  // Load referensi jika belum ada
+  const load = (KAR_BAGIAN.length === 0 && KAR_UNIT.length === 0)
+    ? loadMasterReferensi().then(esRenderChips).catch(esRenderChips)
+    : Promise.resolve(esRenderChips());
+  return load;
+}
+
+// Kembalikan nilai sasaran untuk disimpan (string label)
+function esGetValue() {
+  if (esMode === 'manual') {
+    return document.getElementById('editSasaran')?.value?.trim() || '';
+  }
+  if (esFinalList.length === 0) return '';
+  const labels = [];
+  if (esSelectedBagian.size)  labels.push([...esSelectedBagian].join(', '));
+  if (esSelectedUnit.size)    labels.push([...esSelectedUnit].join(', '));
+  if (esSelectedJabatan.size) labels.push([...esSelectedJabatan].join(', '));
+  const prefix = labels.length ? labels.join(' | ') : 'Filter Karyawan';
+  return prefix + ' (' + esFinalList.length + ' karyawan)';
+}
+
+// Isi sasaran field dari string yang sudah tersimpan (mode manual fallback)
+function esSetFromString(val) {
+  if (!val) return;
+  // Selalu set ke manual jika nilai sudah ada (tidak bisa di-parse ke chip)
+  esSwitchMode('manual');
+  const inp = document.getElementById('editSasaran');
+  if (inp) inp.value = val;
+}
+
+// Load daftar nama langsung dari array (sasaran_names dari DB) → tampil di mode filter preview
+function esLoadFromNames(names) {
+  if (!Array.isArray(names) || names.length === 0) return;
+  // Pastikan mode filter aktif
+  esSwitchMode('filter');
+  esExcluded.clear();
+  esManualExtra = [];
+  esSelectedBagian.clear();
+  esSelectedUnit.clear();
+  esSelectedJabatan.clear();
+  esRenderChips();
+
+  // Buat esFinalList langsung dari nama yang tersimpan, cocokkan dengan karCache
+  esFinalList = names.map(nama => {
+    const info = karCache.find(k => k.nama === nama);
+    return info || { nama, bagian: '', unit: '', jabatan: '' };
+  });
+
+  // Tampilkan preview
+  const wrap  = document.getElementById('esPreviewWrap');
+  const list  = document.getElementById('esPreviewList');
+  const hint  = document.getElementById('esEmptyHint');
+  const count = document.getElementById('esPreviewCount');
+  if (wrap)  wrap.style.display  = 'block';
+  if (hint)  hint.style.display  = 'none';
+  if (count) count.textContent   = esFinalList.length + ' karyawan terpilih';
+  if (list) {
+    list.innerHTML = esFinalList.map((k, i) =>
+      `<div class="sas-preview-item">
+        <span class="sas-num">${i+1}.</span>
+        <span class="sas-name">${escHtml(k.nama)}</span>
+        <span class="sas-meta">${escHtml(k.jabatan||'')}${k.jabatan && k.bagian ? ' · ' : ''}${escHtml(k.bagian||'')}</span>
+        <button class="sas-del" onmousedown="esExclude('${escAttr(k.nama)}')">✕</button>
+      </div>`
+    ).join('');
+  }
+}
+// ===== END EDIT MODAL SASARAN =====
 
 async function dashToggleStatus(id, newStatus) {
   if (!sbReady()) { alert('⚠️ Supabase belum dikonfigurasi.'); return; }
