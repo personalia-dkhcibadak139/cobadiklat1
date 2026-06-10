@@ -428,7 +428,7 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
 }
 .admin-panel.active { display:flex; }
 .admin-box {
-  background:#fff; border-radius:16px; width:92%; max-width:500px;
+  background:#fff; border-radius:16px; width:96%; max-width:700px;
   max-height:90vh; overflow:hidden; display:flex; flex-direction:column;
   box-shadow:0 8px 40px rgba(0,0,0,0.3);
 }
@@ -451,7 +451,7 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
   font-weight:700; cursor:pointer;
 }
 .admin-login .err { color:#e53935; font-size:.82rem; margin-top:6px; }
-.admin-content { flex:1; overflow-y:auto; padding:16px 20px; display:none; }
+.admin-content { flex:1; overflow:hidden; display:none; }
 .admin-tanggal {
   margin-bottom:16px; border:1px solid #eee; border-radius:10px; overflow:hidden;
 }
@@ -484,16 +484,149 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
 }
 .btn-batal:hover { background:#ffebee; }
 
-/* ===== ADMIN TABS ===== */
-.admin-tabs {
-  display:flex; border-bottom:2px solid #eee; background:#fafafa;
+/* ===== ADMIN SIDEBAR ===== */
+.admin-layout {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
 }
+
+/* Sidebar */
+.admin-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: #1a1a2e;
+  border-radius: 0 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 10px 0 16px;
+}
+
+/* Grup label */
+.sidebar-group {
+  margin-bottom: 4px;
+}
+.sidebar-group-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  padding: 10px 16px 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  transition: color .15s;
+}
+.sidebar-group-label:hover { color: rgba(255,255,255,0.55); }
+.sidebar-group-label .sg-arrow {
+  font-size: 8px;
+  transition: transform .2s;
+}
+.sidebar-group.open .sg-arrow { transform: rotate(180deg); }
+
+/* Sub-menu items */
+.sidebar-submenu {
+  display: none;
+}
+.sidebar-group.open .sidebar-submenu {
+  display: block;
+}
+
 .admin-tab {
-  flex:1; padding:11px 6px; text-align:center; font-size:.82rem;
-  font-weight:600; cursor:pointer; color:#888; border:none;
-  background:none; transition:.2s;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 16px 9px 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: .8rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all .15s;
+  border-left: 3px solid transparent;
+  position: relative;
 }
-.admin-tab.active { color:#e86b1a; border-bottom:2px solid #e86b1a; }
+.admin-tab:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+.admin-tab.active {
+  color: #F47920;
+  background: rgba(244,121,32,0.12);
+  border-left-color: #F47920;
+  font-weight: 600;
+}
+.admin-tab .tab-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+}
+.admin-tab .tab-soon {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.4);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: auto;
+  text-transform: uppercase;
+}
+
+/* Konten area */
+.admin-content-area {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+/* Mobile toggle untuk sidebar */
+.sidebar-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #1a1a2e;
+  cursor: pointer;
+  border-radius: 0;
+  border: none;
+  width: 100%;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: .85rem;
+  font-weight: 600;
+}
+.sidebar-toggle .hamburger {
+  font-size: 18px;
+  line-height: 1;
+}
+
+@media (max-width: 520px) {
+  .admin-layout { flex-direction: column; }
+  .admin-sidebar {
+    width: 100%;
+    border-radius: 0;
+    display: none;
+    padding-bottom: 8px;
+  }
+  .admin-sidebar.mobile-open { display: flex; }
+  .admin-content-area { max-height: 55vh; }
+  .sidebar-toggle { display: flex; }
+  .admin-sidebar-inner { flex-direction: row; flex-wrap: wrap; padding: 6px 8px; gap: 4px; }
+}
 
 /* ===== QR CODE PANEL ===== */
 .qr-grid {
@@ -510,6 +643,14 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
   background:#e86b1a; color:#fff; border:none; border-radius:6px;
   padding:6px 12px; font-size:.75rem; cursor:pointer; width:100%;
 }
+
+/* ===== GELOMBANG STEPPER ===== */
+.iht-gel-wrap{display:flex;align-items:center;border:1.5px solid #ffe0c0;border-radius:9px;overflow:hidden;background:#fff8f2;}
+.iht-gel-btn{width:36px;height:36px;border:none;background:none;font-size:1.2rem;font-weight:700;color:#e86b1a;cursor:pointer;transition:background .15s;flex-shrink:0;}
+.iht-gel-btn:hover{background:#ffe8d0;}
+.iht-gel-btn:active{background:#ffd5b0;}
+.iht-gel-val{min-width:44px;text-align:center;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;color:#1a1a1a;padding:0 4px;}
+/* ===== END GELOMBANG ===== */
 
 /* ===== SASARAN PESERTA SMART FILTER ===== */
 .sas-mode-row{display:flex;gap:6px;margin-bottom:10px;}
@@ -540,6 +681,9 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
 .sas-add-input:focus{border-color:#e86b1a;}
 .sas-add-btn{background:#e86b1a;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap;}
 .sas-empty-hint{font-size:.78rem;color:#bbb;font-style:italic;text-align:center;padding:10px 0;display:block;}
+/* ===== KARYAWAN AUTOCOMPLETE ===== */
+.inp-kar-opt:hover { background: #fff5ee !important; }
+.inp-kar-opt-added { opacity: .7; }
 /* ===== END SASARAN FILTER ===== */
 
 /* ===== INPUT PESERTA TAB ===== */
@@ -1388,7 +1532,7 @@ let ihtDataDB = {};
 async function loadIhtDataDB() {
   if (!sbReady()) return;
   try {
-    const rows = await sbFetch('iht_data?select=tanggal_pelaksanaan,judul_diklat,narasumber,jam,tempat,sasaran,flyer_url&order=tanggal_pelaksanaan.asc');
+    const rows = await sbFetch('iht_data?select=tanggal_pelaksanaan,judul_diklat,narasumber,jam,tempat,sasaran,flyer_url,kuota&order=tanggal_pelaksanaan.asc');
     ihtDataDB = {};
     (rows || []).forEach(r => {
       const d = new Date(r.tanggal_pelaksanaan);
@@ -1547,10 +1691,12 @@ function openModal(day){
       modalImg.innerHTML = '<button class="modal-close dark" onclick="closeAll()"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button><img src="' + ev.flyer_url + '" alt="Flyer IHT" style="width:100%;display:block;">';
       modalImg.style.display = 'block';
       overlay.classList.add('active');
+      // Setelah flyer ditampilkan, siapkan data kuota dari DB agar bisa daftar juga
+      openRegDB(day, ev);
       return;
     }
-    // Tidak ada flyer — langsung ke pendaftaran jika tersedia
-    if (PESERTA[day]) { openReg(day); }
+    // Tidak ada flyer — langsung ke pendaftaran dengan kuota dari DB
+    openRegDB(day, ev);
     return;
   }
 
@@ -1667,6 +1813,39 @@ function openReg(day) {
   loadRegData().then(() => refreshRegUI(day));
 }
 
+// Buka panel registrasi untuk event dari DB (kuota dari iht_data)
+let currentRegKuotaDB = 999; // kuota aktif untuk event DB
+function openRegDB(day, ev) {
+  currentRegDay = day;
+  currentRegKuotaDB = (ev && ev.kuota != null && ev.kuota !== 0) ? ev.kuota : 999;
+
+  const judul = ev ? ev.judul_diklat : ('IHT ' + day);
+  document.getElementById('regTitle').textContent = judul;
+  document.getElementById('regSubtitle').textContent = 'Pilih nama Anda untuk mendaftar';
+  document.getElementById('regSearch').value = '';
+  document.getElementById('regPanel').classList.add('active');
+
+  refreshRegUIDB(day);
+  loadRegData().then(() => refreshRegUIDB(day));
+}
+
+function refreshRegUIDB(day) {
+  const registered = regData[day] || [];
+  const kuota = currentRegKuotaDB;
+  const sisa = kuota === 999 ? '∞' : Math.max(0, kuota - registered.length);
+
+  document.getElementById('regKuotaLeft').textContent = sisa;
+  document.getElementById('regKuotaUsed').textContent = registered.length;
+
+  const full = kuota !== 999 && registered.length >= kuota;
+  document.getElementById('regFullMsg').style.display = full ? 'block' : 'none';
+
+  // Ambil daftar nama peserta dari sasaran DB atau PESERTA lokal jika ada
+  const p = PESERTA[day];
+  const names = p ? p.names : [];
+  renderRegList(names, registered, full);
+}
+
 function refreshRegUI(day) {
   const p = PESERTA[day];
   const registered = regData[day] || [];
@@ -1716,9 +1895,9 @@ function filterReg() {
 async function daftar(nama) {
   const day = currentRegDay;
   const p = PESERTA[day];
-  if(!p) return;
   const registered = regData[day] || [];
-  const kuota = p.kuota;
+  // Gunakan kuota dari DB event jika tidak ada PESERTA lokal
+  const kuota = p ? p.kuota : currentRegKuotaDB;
   
   if(kuota !== 999 && registered.length >= kuota) {
     alert('Maaf, kuota sudah penuh!');
@@ -1787,29 +1966,172 @@ function checkAdmin() {
 
 function renderAdminContent() {
   const el = document.getElementById('adminContent');
-  // Buat tabs
   el.innerHTML = `
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="switchAdminTab('peserta',this)">📋 Peserta</button>
-      <button class="admin-tab" onclick="switchAdminTab('input',this)">➕ Input</button>
-      <button class="admin-tab" onclick="switchAdminTab('qr',this)">📲 QR</button>
-      <button class="admin-tab" onclick="switchAdminTab('ttd',this)">✍️ TTD</button>
-      <button class="admin-tab" onclick="switchAdminTab('iht',this)">🗓 IHT</button>
-      <button class="admin-tab" onclick="switchAdminTab('karyawan',this)">👥 Karyawan</button>
-      <button class="admin-tab" onclick="switchAdminTab('referensi',this)">🏷 Referensi</button>
+    <!-- Mobile hamburger toggle -->
+    <button class="sidebar-toggle" onclick="toggleAdminSidebar()">
+      <span class="hamburger">☰</span>
+      <span id="sidebarCurrentLabel">Menu Admin</span>
+    </button>
+
+    <div class="admin-layout">
+      <!-- SIDEBAR KIRI -->
+      <nav class="admin-sidebar" id="adminSidebar">
+
+        <!-- GRUP: Master Data -->
+        <div class="sidebar-group open" id="grpMaster">
+          <div class="sidebar-group-label" onclick="toggleSidebarGroup('grpMaster')">
+            Master Data <span class="sg-arrow">▾</span>
+          </div>
+          <div class="sidebar-submenu">
+            <button class="admin-tab" onclick="switchAdminTab('karyawan',this)" data-label="Karyawan">
+              <span class="tab-icon">👥</span> Karyawan
+            </button>
+            <button class="admin-tab" onclick="switchAdminTab('bagian',this)" data-label="Bagian">
+              <span class="tab-icon">🏢</span> Bagian
+            </button>
+            <button class="admin-tab" onclick="switchAdminTab('unit',this)" data-label="Unit">
+              <span class="tab-icon">🔬</span> Unit
+            </button>
+            <button class="admin-tab" onclick="switchAdminTab('jabatan',this)" data-label="Jabatan">
+              <span class="tab-icon">💼</span> Jabatan
+            </button>
+            <button class="admin-tab" onclick="switchAdminTab('daftardiklat',this)" data-label="Daftar Diklat">
+              <span class="tab-icon">📋</span> Daftar Diklat
+            </button>
+          </div>
+        </div>
+
+        <!-- GRUP: Diklat -->
+        <div class="sidebar-group open" id="grpDiklat">
+          <div class="sidebar-group-label" onclick="toggleSidebarGroup('grpDiklat')">
+            Diklat <span class="sg-arrow">▾</span>
+          </div>
+          <div class="sidebar-submenu">
+            <button class="admin-tab active" onclick="switchAdminTab('iht',this)" data-label="Tambah IHT Baru">
+              <span class="tab-icon">🗓</span> Tambah IHT Baru
+            </button>
+            <button class="admin-tab" onclick="switchAdminTab('peserta',this)" data-label="Peserta">
+              <span class="tab-icon">📋</span> Peserta
+            </button>
+            <button class="admin-tab" onclick="switchAdminTab('daftarhadir',this)" data-label="Daftar Hadir">
+              <span class="tab-icon">✅</span> Daftar Hadir
+            </button>
+          </div>
+        </div>
+
+        <!-- GRUP: Lainnya -->
+        <div class="sidebar-group open" id="grpSoon">
+          <div class="sidebar-group-label" onclick="toggleSidebarGroup('grpSoon')">
+            Lainnya <span class="sg-arrow">▾</span>
+          </div>
+          <div class="sidebar-submenu">
+            <button class="admin-tab" disabled style="opacity:.5;cursor:default;">
+              <span class="tab-icon">📜</span> Riwayat Diklat <span class="tab-soon">Soon</span>
+            </button>
+            <button class="admin-tab" disabled style="opacity:.5;cursor:default;">
+              <span class="tab-icon">📊</span> Laporan <span class="tab-soon">Soon</span>
+            </button>
+            <button class="admin-tab" disabled style="opacity:.5;cursor:default;">
+              <span class="tab-icon">⚙️</span> Pengaturan <span class="tab-soon">Soon</span>
+            </button>
+          </div>
+        </div>
+
+      </nav>
+
+      <!-- KONTEN UTAMA -->
+      <div class="admin-content-area">
+        <div id="adminTabPeserta"      style="display:none;padding:12px 0;"></div>
+        <div id="adminTabInputLegacy"  style="display:none;padding:12px 16px;"></div>
+        <div id="adminTabQR"           style="display:none;"></div>
+        <div id="adminTabTTD"          style="display:none;padding:12px 0;"></div>
+        <div id="adminTabIHT"          style="padding:12px 16px;"></div>
+        <div id="adminTabKaryawan"     style="display:none;padding:12px 16px;"></div>
+        <div id="adminTabBagian"       style="display:none;padding:12px 16px;"></div>
+        <div id="adminTabUnit"         style="display:none;padding:12px 16px;"></div>
+        <div id="adminTabJabatan"      style="display:none;padding:12px 16px;"></div>
+        <div id="adminTabDaftarDiklat" style="display:none;padding:12px 16px;"></div>
+        <div id="adminTabPesertaInput" style="display:none;padding:12px 16px;"></div>
+        <div id="adminTabDaftarHadir"  style="display:none;"></div>
+      </div>
     </div>
-    <div id="adminTabPeserta" style="padding:12px 0;overflow-y:auto;max-height:65vh;"></div>
-    <div id="adminTabInput" style="display:none;padding:12px 16px;overflow-y:auto;max-height:65vh;"></div>
-    <div id="adminTabQR" style="display:none;overflow-y:auto;max-height:65vh;"></div>
-    <div id="adminTabTTD" style="padding:12px 0;overflow-y:auto;max-height:65vh;"></div>
-    <div id="adminTabIHT" style="display:none;overflow-y:auto;max-height:65vh;"></div>
-    <div id="adminTabKaryawan" style="display:none;padding:12px 16px;overflow-y:auto;max-height:65vh;"></div>
-    <div id="adminTabReferensi" style="display:none;padding:12px 16px;overflow-y:auto;max-height:65vh;"></div>
   `;
-  renderAdminPeserta();
-  renderAdminQR();
-  renderAdminTTD();
-  // adminTabInput dan adminTabIHT rendered lazily on tab click
+  renderAdminIHT();
+  renderAdminPesertaInput();
+  renderAdminDaftarHadir();
+}
+
+// ===== PESERTA + INPUT GABUNGAN =====
+function renderAdminPesertaInput() {
+  const el = document.getElementById('adminTabPesertaInput');
+  if(!el) return;
+
+  const sectionHdr = (icon, title) =>
+    `<div style="display:flex;align-items:center;gap:8px;margin:0 0 14px;padding-bottom:8px;border-bottom:2px solid #ffe0c0;">
+      <span style="font-size:18px;">${icon}</span>
+      <span style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;letter-spacing:2px;color:#e86b1a;text-transform:uppercase;">${title}</span>
+    </div>`;
+
+  el.innerHTML = `
+    <div id="pesertaInputSection">
+      ${sectionHdr('➕','Input Peserta')}
+      <div id="inpRenderTarget" style="padding:0;"></div>
+    </div>
+  `;
+
+  renderAdminInput();
+}
+
+// ===== QR + TTD GABUNGAN =====
+function renderAdminDaftarHadir() {
+  const el = document.getElementById('adminTabDaftarHadir');
+  if(!el) return;
+
+  const sectionHdr = (icon, title) =>
+    `<div style="display:flex;align-items:center;gap:8px;margin:0 0 14px;padding-bottom:8px;border-bottom:2px solid #ffe0c0;">
+      <span style="font-size:18px;">${icon}</span>
+      <span style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;letter-spacing:2px;color:#e86b1a;text-transform:uppercase;">${title}</span>
+    </div>`;
+
+  // QR section
+  const tanggals = Object.keys(PESERTA).sort((a,b)=>+a-+b);
+  const evtInfo = {
+    8:'Asuhan Keperawatan', 15:'Mitigasi Bencana', 17:'PPI Lanjutan Gel 1',
+    18:'Komunikasi Efektif', 19:'PMKP Gel 2', 23:'Hospitalpreneur Gel 5',
+    25:'PPI Lanjutan Gel 2', 26:'Pemasangan Infus', 29:'Unit Dose Dispensing', 30:'Sapa Talk'
+  };
+  const qrHTML = '<div class="qr-grid">' +
+    tanggals.map(t =>
+      '<div class="qr-card" id="qrcard'+t+'">' +
+        '<h4>'+t+' Juni 2026</h4>' +
+        '<small>'+(evtInfo[+t]||'IHT')+'</small>' +
+        '<div id="qrdiv'+t+'" style="display:inline-block;margin:6px auto 8px;"></div>' +
+        '<button class="btn-print-qr" onclick="printQR('+t+')">🖨️ Print QR</button>' +
+      '</div>'
+    ).join('') +
+  '</div>';
+
+  el.innerHTML = `
+    <div style="padding:12px 16px 20px;">
+      ${sectionHdr('📲','QR Code Absensi')}
+      ${qrHTML}
+    </div>
+    <div style="padding:0 16px 16px;">
+      ${sectionHdr('✍️','Tanda Tangan Digital')}
+      <div><button onclick="loadTTDAdmin()" style="background:#e86b1a;color:#fff;border:none;border-radius:8px;padding:9px 18px;cursor:pointer;font-size:.85rem;">🔄 Muat Data Tanda Tangan</button></div>
+      <div id="ttdAdminList"></div>
+    </div>
+  `;
+
+  setTimeout(()=>generateAllQR(), 200);
+}
+
+function toggleAdminSidebar() {
+  document.getElementById('adminSidebar').classList.toggle('mobile-open');
+}
+
+function toggleSidebarGroup(id) {
+  document.getElementById(id).classList.toggle('open');
 }
 
 // ===== INPUT PESERTA =====
@@ -1821,20 +2143,17 @@ let inpCalMonth = 6;
 let inpTglSelected = ''; // ISO "YYYY-MM-DD"
 
 function renderAdminInput() {
-  const el = document.getElementById('adminTabInput');
-  // Selalu re-render agar tanggal IHT baru dari Supabase ikut tampil
+  const el = document.getElementById('inpRenderTarget') || document.getElementById('adminTabInput');
+  if(!el) return;
   inpTglSelected = '';
 
   el.innerHTML = `
-    <div class="inp-info-box">
-      💡 Upload file Excel (.xlsx/.xls) berisi daftar nama karyawan di <strong>kolom A</strong>.<br>
-      Data akan di-<em>merge</em> (digabung) dengan peserta yang sudah ada — nama duplikat diabaikan otomatis.
-    </div>
-
     <div class="inp-section">
       <div class="inp-section-title">1. Pilih Tanggal IHT</div>
       <div class="inp-cal-wrap" id="inpCalWrap"></div>
     </div>
+
+    <div id="inpPesertaTerdaftarWrap"></div>
 
     <div class="inp-section">
       <div class="inp-section-title">2. Upload Excel</div>
@@ -1842,6 +2161,10 @@ function renderAdminInput() {
         <input type="file" id="inpFileInput" accept=".xlsx,.xls" onchange="handleInpFile(event)">
         <div class="inp-upload-icon">📂</div>
         <div class="inp-upload-txt">Klik atau drag &amp; drop file di sini<br><strong>.xlsx / .xls</strong> — kolom A = nama karyawan</div>
+      </div>
+      <div class="inp-info-box" style="margin-top:8px;">
+        💡 Upload file Excel (.xlsx/.xls) berisi daftar nama karyawan di <strong>kolom A</strong>.<br>
+        Data akan di-<em>merge</em> (digabung) dengan peserta yang sudah ada — nama duplikat diabaikan otomatis.
       </div>
       <div id="inpPreview" class="inp-preview">
         <div class="inp-preview-hdr">
@@ -1853,11 +2176,18 @@ function renderAdminInput() {
     </div>
 
     <div class="inp-section">
-      <div class="inp-section-title">3. Atau Tambah Manual (satu per satu)</div>
-      <div class="inp-manual-wrap">
-        <input type="text" id="inpManualInput" placeholder="Ketik nama lengkap..." onkeydown="if(event.key==='Enter')addManualName()">
+      <div class="inp-section-title">3. Atau Tambah dari Daftar Karyawan</div>
+      <div class="inp-manual-wrap" style="position:relative;">
+        <div style="position:relative;flex:1;">
+          <input type="text" id="inpManualInput" placeholder="🔍 Ketik nama karyawan..." autocomplete="off" spellcheck="false"
+            oninput="inpKaryawanFilter(this.value)"
+            onkeydown="inpKaryawanKeydown(event)"
+            onfocus="inpKaryawanFilter(this.value)">
+          <div id="inpKaryawanDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e86b1a;border-top:none;border-radius:0 0 10px 10px;max-height:220px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(244,121,32,0.15);"></div>
+        </div>
         <button onclick="addManualName()">+ Tambah</button>
       </div>
+      <div id="inpKaryawanStats" style="font-size:.75rem;color:#bbb;margin-top:4px;padding-left:2px;"></div>
     </div>
 
     <div class="inp-status" id="inpStatus"></div>
@@ -1976,7 +2306,65 @@ function inpCalNav(arah) {
 function selectInpTgl(isoKey) {
   inpTglSelected = isoKey;
   buildInpCal();
+  renderInpPesertaTerdaftar(isoKey);
   renderInpPreview();
+}
+
+// ===== RENDER PESERTA TERDAFTAR (inline setelah klik tanggal) =====
+function renderInpPesertaTerdaftar(isoKey) {
+  const wrap = document.getElementById('inpPesertaTerdaftarWrap');
+  if (!wrap) return;
+
+  const dayKey = Number(isoKey.split('-')[2]);
+  const legacyKey = String(dayKey);
+  const existing  = PESERTA[dayKey] ? PESERTA[dayKey].names : [];
+  const regExist  = regData[isoKey] || regData[legacyKey] || [];
+  const allList   = [...new Set([...existing, ...regExist])];
+
+  const parts = isoKey.split('-');
+  const tglLabel = Number(parts[2]) + ' ' + (NAMA_BULAN[Number(parts[1])] || '') + ' ' + parts[0];
+
+  // Dapatkan info IHT (judul) jika ada
+  let judul = '';
+  const monthKey = parts[0] + '-' + parts[1];
+  if (ihtDataDB[monthKey] && ihtDataDB[monthKey][dayKey]) {
+    judul = ihtDataDB[monthKey][dayKey].judul || '';
+  }
+
+  const kuota = PESERTA[dayKey] ? PESERTA[dayKey].kuota : 0;
+  const kuotaStr = !kuota || kuota === 999 ? '\u221e' : kuota;
+
+  const bodyId = 'ptdBodyInner';
+  wrap.innerHTML = `
+    <div style="border:1.5px solid #ffe0c0;border-radius:12px;overflow:hidden;margin-bottom:16px;">
+      <div style="background:linear-gradient(135deg,#fff5ee,#fff0e0);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;cursor:pointer;" onclick="var b=document.getElementById('ptdBodyInner');b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.ptd-arrow').style.transform=b.style.display==='none'?'':'rotate(180deg)';">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">\u{1F4CB}</span>
+          <div>
+            <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;letter-spacing:1.5px;color:#e86b1a;text-transform:uppercase;">Peserta Terdaftar</div>
+            <div style="font-size:12px;color:#555;margin-top:1px;">${tglLabel}${judul ? ' &middot; ' + escHtml(judul) : ''}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="background:#e86b1a;color:#fff;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;">${allList.length}/${kuotaStr}</span>
+          <svg class="ptd-arrow" width="16" height="16" viewBox="0 0 24 24" style="fill:#e86b1a;transition:transform .2s;transform:rotate(180deg);"><path d="M7 10l5 5 5-5z"/></svg>
+        </div>
+      </div>
+      <div id="ptdBodyInner" style="display:block;max-height:300px;overflow-y:auto;">
+        ${allList.length === 0
+          ? '<div style="padding:16px;text-align:center;color:#bbb;font-size:13px;">Belum ada peserta terdaftar</div>'
+          : allList.map((n,i) =>
+              '<div style="display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid #fff5ee;font-size:13px;color:#333;">' +
+                '<span style="color:#bbb;min-width:24px;font-size:11px;">' + (i+1) + '.</span>' +
+                '<span style="flex:1;">' + escHtml(n) + '</span>' +
+                '<button onclick="batalDaftar(\'' + escAttr(legacyKey) + '\',\'' + escAttr(n) + '\')" style="background:none;border:1px solid #ffcdd2;color:#e53935;border-radius:5px;padding:2px 8px;font-size:.7rem;cursor:pointer;" title="Batalkan">\u2715</button>' +
+              '</div>'
+            ).join('')
+        }
+        ${allList.length > 0 ? '<div style="padding:8px 14px;"><button onclick="downloadExcel(\'' + legacyKey + '\')" style="background:none;border:1.5px solid #ffe0c0;color:#e86b1a;border-radius:7px;padding:6px 14px;font-size:.78rem;cursor:pointer;width:100%;font-weight:600;">\u2b07 Download Excel</button></div>' : ''}
+      </div>
+    </div>
+  `;
 }
 
 function handleInpFile(e) {
@@ -2020,10 +2408,106 @@ function mergeInpNames(newNames) {
   renderInpPreview();
 }
 
+let inpKaryawanHighlight = -1;
+
+function inpKaryawanFilter(q) {
+  const dd = document.getElementById('inpKaryawanDropdown');
+  const statsEl = document.getElementById('inpKaryawanStats');
+  if (!dd) return;
+  inpKaryawanHighlight = -1;
+
+  const query = (q || '').trim().toLowerCase();
+
+  // Sumber: karCache (data karyawan dari Supabase), fallback ke PESERTA names
+  let pool = [];
+  if (karCache && karCache.length > 0) {
+    pool = karCache.map(k => k.nama);
+    if (statsEl) statsEl.textContent = karCache.length + ' karyawan tersedia';
+  } else {
+    // Fallback: kumpulkan semua nama dari PESERTA
+    const allNames = new Set();
+    Object.values(PESERTA).forEach(p => (p.names||[]).forEach(n => allNames.add(n)));
+    pool = [...allNames];
+    if (statsEl) statsEl.textContent = 'Data karyawan belum dimuat — menampilkan nama dari peserta lama';
+  }
+
+  // Filter berdasarkan query
+  const filtered = query
+    ? pool.filter(n => n.toLowerCase().includes(query)).slice(0, 50)
+    : pool.slice(0, 50);
+
+  if (filtered.length === 0 || !q) {
+    dd.style.display = 'none';
+    return;
+  }
+
+  dd.innerHTML = filtered.map((n, i) => {
+    const already = inpPreviewNames.includes(n);
+    const hl = query ? n.replace(new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'), '<mark style="background:#ffe5c8;color:#e86b1a;border-radius:2px;">$1</mark>') : escHtml(n);
+    return `<div class="inp-kar-opt${already?' inp-kar-opt-added':''}" data-nama="${escHtml(n)}" data-idx="${i}"
+      onmousedown="event.preventDefault();inpKaryawanSelect('${escAttr(n)}')"
+      style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:.85rem;border-bottom:1px solid #fff5ee;${already?'color:#bbb;':'color:#333;'}">
+      <span style="flex:1;">${hl}</span>
+      ${already ? '<span style="font-size:.7rem;color:#27ae60;font-weight:700;">✓ sudah</span>' : ''}
+    </div>`;
+  }).join('');
+
+  dd.style.display = 'block';
+}
+
+function inpKaryawanSelect(nama) {
+  const inp = document.getElementById('inpManualInput');
+  if (inp) inp.value = nama;
+  const dd = document.getElementById('inpKaryawanDropdown');
+  if (dd) dd.style.display = 'none';
+  addManualName();
+}
+
+function inpKaryawanKeydown(e) {
+  const dd = document.getElementById('inpKaryawanDropdown');
+  if (!dd || dd.style.display === 'none') {
+    if (e.key === 'Enter') addManualName();
+    return;
+  }
+  const opts = dd.querySelectorAll('.inp-kar-opt');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    inpKaryawanHighlight = Math.min(inpKaryawanHighlight + 1, opts.length - 1);
+    opts.forEach((o, i) => o.style.background = i === inpKaryawanHighlight ? '#fff5ee' : '');
+    if (opts[inpKaryawanHighlight]) opts[inpKaryawanHighlight].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    inpKaryawanHighlight = Math.max(inpKaryawanHighlight - 1, 0);
+    opts.forEach((o, i) => o.style.background = i === inpKaryawanHighlight ? '#fff5ee' : '');
+    if (opts[inpKaryawanHighlight]) opts[inpKaryawanHighlight].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (inpKaryawanHighlight >= 0 && opts[inpKaryawanHighlight]) {
+      inpKaryawanSelect(opts[inpKaryawanHighlight].dataset.nama);
+    } else {
+      addManualName();
+    }
+  } else if (e.key === 'Escape') {
+    dd.style.display = 'none';
+    inpKaryawanHighlight = -1;
+  }
+}
+
+// Tutup dropdown klik di luar
+document.addEventListener('mousedown', function(e) {
+  const dd = document.getElementById('inpKaryawanDropdown');
+  const inp = document.getElementById('inpManualInput');
+  if (dd && inp && !dd.contains(e.target) && e.target !== inp) {
+    dd.style.display = 'none';
+  }
+});
+
 function addManualName() {
   const inp = document.getElementById('inpManualInput');
   const nama = inp.value.trim();
   if(!nama) return;
+  const dd = document.getElementById('inpKaryawanDropdown');
+  if(dd) dd.style.display = 'none';
   if(!inpPreviewNames.includes(nama)) {
     inpPreviewNames.push(nama);
     renderInpPreview();
@@ -2131,7 +2615,11 @@ async function submitInpPeserta() {
     clearInpPreview();
     // Refresh tab peserta
     await loadRegData();
-    renderAdminPeserta();
+    renderAdminPesertaInput();
+    // Refresh panel peserta terdaftar inline
+    if (inpTglSelected) {
+      setTimeout(() => renderInpPesertaTerdaftar(inpTglSelected), 50);
+    }
 
   } catch(err) {
     // Tetap update lokal meski GAS gagal
@@ -2142,18 +2630,39 @@ async function submitInpPeserta() {
 
 function switchAdminTab(tab, btn) {
   document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('adminTabPeserta').style.display = tab==='peserta'?'block':'none';
-  document.getElementById('adminTabInput').style.display = tab==='input'?'block':'none';
-  document.getElementById('adminTabQR').style.display = tab==='qr'?'block':'none';
-  document.getElementById('adminTabTTD').style.display = tab==='ttd'?'block':'none';
-  document.getElementById('adminTabIHT').style.display = tab==='iht'?'block':'none';
-  document.getElementById('adminTabKaryawan').style.display = tab==='karyawan'?'block':'none';
-  document.getElementById('adminTabReferensi').style.display = tab==='referensi'?'block':'none';
-  if(tab==='input') renderAdminInput();
-  if(tab==='iht') renderAdminIHT();
-  if(tab==='karyawan') renderAdminKaryawan();
-  if(tab==='referensi') renderAdminReferensi();
+  if(btn) btn.classList.add('active');
+
+  const label = btn ? (btn.dataset.label || tab) : tab;
+  const lbl = document.getElementById('sidebarCurrentLabel');
+  if(lbl) lbl.textContent = label;
+
+  const sb = document.getElementById('adminSidebar');
+  if(sb) sb.classList.remove('mobile-open');
+
+  // Mapping tab key → element ID (eksplisit, hindari bug camelCase)
+  const tabMap = {
+    peserta:      'adminTabPesertaInput',
+    iht:          'adminTabIHT',
+    daftarhadir:  'adminTabDaftarHadir',
+    karyawan:     'adminTabKaryawan',
+    bagian:       'adminTabBagian',
+    unit:         'adminTabUnit',
+    jabatan:      'adminTabJabatan',
+    daftardiklat: 'adminTabDaftarDiklat',
+  };
+  Object.entries(tabMap).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = (key === tab) ? 'block' : 'none';
+  });
+
+  if(tab==='iht')          renderAdminIHT();
+  if(tab==='peserta')      renderAdminPesertaInput();
+  if(tab==='daftarhadir')  renderAdminDaftarHadir();
+  if(tab==='karyawan')     renderAdminKaryawan();
+  if(tab==='bagian')       renderAdminRefSingle('bagian');
+  if(tab==='unit')         renderAdminRefSingle('unit');
+  if(tab==='jabatan')      renderAdminRefSingle('jabatan');
+  if(tab==='daftardiklat') renderAdminDaftarDiklat();
 }
 
 function renderAdminPeserta() {
@@ -2245,7 +2754,11 @@ async function batalDaftar(tanggal, nama) {
       prefer: 'return=minimal'
     });
     await loadRegData();
-    renderAdminPeserta();
+    renderAdminPesertaInput();
+    // Jika ada tanggal yang sedang aktif, refresh panel peserta terdaftar
+    if (inpTglSelected) {
+      setTimeout(() => renderInpPesertaTerdaftar(inpTglSelected), 50);
+    }
     alert('✅ Pendaftaran ' + nama + ' berhasil dibatalkan');
   } catch(e) {
     alert('Koneksi gagal: ' + e.message);
@@ -2768,6 +3281,129 @@ function sasInitFilter() {
 }
 // ===== END SASARAN FILTER =====
 
+// ===== JUDUL DIKLAT AUTOCOMPLETE dari IHT_LIST =====
+function ihtInitJudul() {
+  const inputEl = document.getElementById('ihtJudulDiklat');
+  const listEl  = document.getElementById('ihtJudulList');
+  const wrap    = document.getElementById('ihtJudulWrap');
+  if (!inputEl || !listEl) return;
+
+  function getOptions(q) {
+    const sorted = [...IHT_LIST].sort();
+    if (!q) return sorted;
+    // Prioritaskan yang dimulai dengan query, lalu yang mengandung
+    const starts   = sorted.filter(n => n.toLowerCase().startsWith(q.toLowerCase()));
+    const contains = sorted.filter(n => !n.toLowerCase().startsWith(q.toLowerCase()) && n.toLowerCase().includes(q.toLowerCase()));
+    return [...starts, ...contains];
+  }
+
+  function renderList(q) {
+    const opts = getOptions(q);
+    if (opts.length === 0) {
+      listEl.innerHTML = '<div class="iht-nara-empty">Tidak ditemukan di Master IHT</div>';
+    } else {
+      listEl.innerHTML = opts.map(n => {
+        // highlight query dalam teks
+        const hl = q ? n.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'),
+          '<strong style="color:#e86b1a">$1</strong>') : n;
+        return `<div class="iht-nara-option" data-val="${escHtml(n)}">${hl}</div>`;
+      }).join('');
+      listEl.querySelectorAll('.iht-nara-option').forEach(opt => {
+        opt.addEventListener('mousedown', e => {
+          e.preventDefault();
+          inputEl.value = opt.dataset.val;
+          listEl.classList.remove('open');
+          // Setelah pilih judul, fokus ke gelombang
+          ihtGelReset();
+        });
+      });
+    }
+  }
+
+  inputEl.addEventListener('focus', () => { renderList(inputEl.value); listEl.classList.add('open'); });
+  inputEl.addEventListener('input', () => { renderList(inputEl.value); listEl.classList.add('open'); });
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Escape') listEl.classList.remove('open');
+    if (e.key === 'Enter') {
+      const first = listEl.querySelector('.iht-nara-option');
+      if (first) { inputEl.value = first.dataset.val; listEl.classList.remove('open'); ihtGelReset(); }
+    }
+    if (e.key === 'ArrowDown') {
+      const first = listEl.querySelector('.iht-nara-option');
+      if (first) { e.preventDefault(); first.focus(); }
+    }
+  });
+  document.addEventListener('mousedown', e => {
+    if (!wrap.contains(e.target)) listEl.classList.remove('open');
+  }, true);
+}
+
+// ===== GELOMBANG STEPPER =====
+let ihtGelombang = 0; // 0 = tidak diisi
+
+function ihtGelChange(arah) {
+  ihtGelombang = Math.max(0, ihtGelombang + arah);
+  ihtGelRefresh();
+}
+
+function ihtGelReset() {
+  ihtGelombang = 0;
+  ihtGelRefresh();
+}
+
+function ihtGelRefresh() {
+  const valEl   = document.getElementById('ihtGelVal');
+  const labelEl = document.getElementById('ihtGelLabel');
+  if (!valEl) return;
+  if (ihtGelombang === 0) {
+    valEl.textContent = '—';
+    if (labelEl) labelEl.textContent = '';
+  } else {
+    valEl.textContent = ihtGelombang;
+    const teks = 'Gel. ' + ihtGelombang;
+    if (labelEl) labelEl.textContent = teks;
+  }
+}
+
+// Kembalikan suffix gelombang untuk judul akhir
+function ihtGetGelSuffix() {
+  if (ihtGelombang === 0) return '';
+  return ' Gel. ' + ihtGelombang;
+}
+// ===== KUOTA STEPPER =====
+let ihtKuota = 0; // 0 = tidak dibatasi (999 di DB)
+
+function ihtKuotaChange(delta) {
+  ihtKuota = Math.max(0, ihtKuota + delta);
+  ihtKuotaRefresh();
+}
+
+function ihtKuotaSet(val) {
+  ihtKuota = val;
+  ihtKuotaRefresh();
+}
+
+function ihtKuotaReset() {
+  ihtKuota = 0;
+  ihtKuotaRefresh();
+}
+
+function ihtKuotaRefresh() {
+  const valEl   = document.getElementById('ihtKuotaVal');
+  const labelEl = document.getElementById('ihtKuotaLabel');
+  if (!valEl) return;
+  if (ihtKuota === 0) {
+    valEl.textContent = '∞';
+    if (labelEl) labelEl.textContent = 'Tidak dibatasi';
+  } else {
+    valEl.textContent = ihtKuota;
+    if (labelEl) labelEl.textContent = ihtKuota + ' orang maks.';
+  }
+}
+// ===== END KUOTA =====
+
+// ===== END JUDUL & GELOMBANG =====
+
 // ===== ADMIN TAB IHT =====
 let ihtFlyerFile = null; // simpan file flyer yang dipilih (UI saja, belum upload)
 
@@ -2796,7 +3432,46 @@ function renderAdminIHT() {
 
         <div class="iht-field">
           <label class="iht-label">Judul Diklat</label>
-          <input type="text" id="ihtJudulDiklat" class="iht-input" placeholder="Contoh: Asuhan Keperawatan Berbasis Bukti">
+          <div class="iht-nara-wrap" id="ihtJudulWrap">
+            <input type="text" id="ihtJudulDiklat" class="iht-input" placeholder="Ketik atau pilih dari daftar IHT…" autocomplete="off" spellcheck="false">
+            <div class="iht-nara-list" id="ihtJudulList"></div>
+          </div>
+          <div style="font-size:10px;color:#bbb;margin-top:4px;">💡 Ketik bebas atau pilih dari Master IHT di Referensi</div>
+        </div>
+
+        <div class="iht-field">
+          <label class="iht-label">Gelombang <span style="color:#bbb;font-weight:400;font-size:.8em;">(opsional)</span></label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="iht-gel-wrap">
+              <button class="iht-gel-btn" onclick="ihtGelChange(-1)">−</button>
+              <span class="iht-gel-val" id="ihtGelVal">—</span>
+              <button class="iht-gel-btn" onclick="ihtGelChange(1)">+</button>
+            </div>
+            <span id="ihtGelLabel" style="font-size:.82rem;color:#e86b1a;font-weight:600;min-width:80px;"></span>
+            <button onclick="ihtGelReset()" style="background:none;border:1px solid #eee;border-radius:6px;padding:3px 8px;font-size:.72rem;color:#bbb;cursor:pointer;">Reset</button>
+          </div>
+        </div>
+
+        <div class="iht-field">
+          <label class="iht-label">Kuota Peserta <span style="color:#bbb;font-weight:400;font-size:.8em;">(opsional)</span></label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="iht-gel-wrap">
+              <button class="iht-gel-btn" onclick="ihtKuotaChange(-5)">&#x2212;</button>
+              <span class="iht-gel-val" id="ihtKuotaVal" style="min-width:42px;">&#x221E;</span>
+              <button class="iht-gel-btn" onclick="ihtKuotaChange(5)">+</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <span id="ihtKuotaLabel" style="font-size:.82rem;color:#e86b1a;font-weight:600;">Tidak dibatasi</span>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                <button onclick="ihtKuotaSet(20)" style="background:none;border:1px solid #ffe0c0;border-radius:5px;padding:2px 7px;font-size:.7rem;color:#e86b1a;cursor:pointer;">20</button>
+                <button onclick="ihtKuotaSet(25)" style="background:none;border:1px solid #ffe0c0;border-radius:5px;padding:2px 7px;font-size:.7rem;color:#e86b1a;cursor:pointer;">25</button>
+                <button onclick="ihtKuotaSet(30)" style="background:none;border:1px solid #ffe0c0;border-radius:5px;padding:2px 7px;font-size:.7rem;color:#e86b1a;cursor:pointer;">30</button>
+                <button onclick="ihtKuotaSet(50)" style="background:none;border:1px solid #ffe0c0;border-radius:5px;padding:2px 7px;font-size:.7rem;color:#e86b1a;cursor:pointer;">50</button>
+                <button onclick="ihtKuotaReset()" style="background:none;border:1px solid #eee;border-radius:5px;padding:2px 8px;font-size:.7rem;color:#bbb;cursor:pointer;">&#x221E; Bebas</button>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:#bbb;margin-top:5px;">&#x1F4A1; Kosongkan / &#x221E; = tidak dibatasi. Peserta melebihi kuota tidak bisa mendaftar.</div>
         </div>
 
         <div class="iht-field">
@@ -2851,6 +3526,10 @@ function renderAdminIHT() {
 
             <!-- Filter pills: Bagian / Unit / Jabatan -->
             <div class="sas-filter-section">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <span style="font-size:.7rem;color:#bbb;font-style:italic;">Pilih satu atau lebih filter (bisa kombinasi)</span>
+                <button onclick="sasRenderChips()" style="background:none;border:1px solid #eee;border-radius:5px;padding:2px 8px;font-size:.7rem;color:#bbb;cursor:pointer;" title="Muat ulang chip">🔄</button>
+              </div>
               <div class="sas-filter-group" id="sasGrpBagian">
                 <div class="sas-filter-label">🏢 Bagian</div>
                 <div class="sas-chips" id="sasChipsBagian"></div>
@@ -2943,13 +3622,21 @@ function renderAdminIHT() {
   // Init autocomplete narasumber dari data karyawan
   ihtInitNarasumber();
 
-  // Init smart filter sasaran peserta
-  // Pastikan master referensi sudah dimuat (karCache dan KAR_UNIT dll)
-  if (KAR_UNIT.length === 0 && KAR_BAGIAN.length === 0) {
-    loadMasterReferensi().then(() => sasInitFilter());
-  } else {
-    sasInitFilter();
-  }
+  // Init autocomplete judul dari IHT_LIST
+  ihtInitJudul();
+
+  // Init gelombang
+  ihtGelombang = 0;
+  ihtGelRefresh();
+
+  // Init smart filter sasaran peserta — setTimeout memastikan DOM sudah ter-render penuh
+  setTimeout(() => {
+    if (KAR_UNIT.length === 0 && KAR_BAGIAN.length === 0) {
+      loadMasterReferensi().then(() => sasInitFilter()).catch(() => sasInitFilter());
+    } else {
+      sasInitFilter();
+    }
+  }, 50);
 }
 
 function ihtInitNarasumber() {
@@ -3053,7 +3740,8 @@ function showIhtStatus(type, msg) {
 
 async function submitIhtForm() {
   const tanggalDiklat    = document.getElementById('ihtTanggalDiklat').value;
-  const judulDiklat      = document.getElementById('ihtJudulDiklat').value.trim();
+  const judulBase        = document.getElementById('ihtJudulDiklat').value.trim();
+  const judulDiklat      = judulBase + ihtGetGelSuffix();
   const narasumber       = document.getElementById('ihtNarasumber').value.trim();
   const tanggalPelaksanaan = document.getElementById('ihtTanggalPelaksanaan').value;
   const jam              = document.getElementById('ihtJam').value;
@@ -3099,7 +3787,8 @@ async function submitIhtForm() {
         jam:                 jam,
         tempat:              tempat,
         sasaran:             sasaran,
-        flyer_url:           flyerUrl
+        flyer_url:           flyerUrl,
+        kuota:               ihtKuota === 0 ? 999 : ihtKuota
       })
     });
 
@@ -3131,13 +3820,19 @@ async function submitIhtForm() {
     sasResetFilter();
     const sasManualInp = document.getElementById('ihtSasaran');
     if (sasManualInp) sasManualInp.value = '';
+    // Reset gelombang
+    ihtGelombang = 0;
+    ihtGelRefresh();
+    // Reset kuota
+    ihtKuota = 0;
+    ihtKuotaRefresh();
     removeIhtFlyer();
     // ✅ Reload kalender agar tanggal IHT langsung berwarna orange
     await loadIhtDataDB();
     // ✅ Reset tab Input agar kalender tanggal ikut terupdate
     inpPreviewNames = [];
     inpTglSelected = '';
-    const tabInput = document.getElementById('adminTabInput');
+    const tabInput = document.getElementById('inpRenderTarget');
     if (tabInput) tabInput.innerHTML = '';
 
   } catch(err) {
@@ -3763,6 +4458,33 @@ function karDownload() {
   }
 }
 
+// ===== MASTER LIST IHT (Nama-Nama In House Training) =====
+let IHT_LIST = [
+  "ALUR PELAYANAN HIV","ALUR PENGADAAN","ASEPTIC DISPENCING","ASESOR KLINIK",
+  "ASUHAN KEPERAWATAN","ASSESMENT NYERI","BANTUAN HIDUP DASAR (BHD)","BEAUTY CLASS",
+  "CODE BLUE","DIKLAT PPI UNTUK PENGUMPUL DATA IPCLN","HAK DAN KEWAJIBAN PASIEN","HIV",
+  "INVESTIGASI SEDERHANA, RCA, FMEA","K3 LANJUTAN",
+  "K3RS (Bencana Alam, Kebakaran, APAR, Mitigasi Bencana)",
+  "KERAHASIAAN INFORMASI PASIEN DI PENUNJANG MEDIS","KOMUNIKASI EFEKTIF",
+  "MANAJEMEN ASUHAN KEPERAWATAN PROFESIONAL (MAKP)","MANAJEMEN KLAIM TERINTEGRASI",
+  "MANAJEMEN PERALATAN MEDIS","MANAJEMEN RESIKO","MANAJEMEN UTILITAS",
+  "MEDICATION ERROR","MENUMBUHKAN JIWA HOSPITALPRENEUR PADA KARYAWAN RS DKH CIBADAK",
+  "MITIGASI BENCANA","MODEL PEMASANGAN KATETER","PATIENT SAFETY","PELAKSANAAN SIM RS",
+  "PELAYANAN GERIATRI","PELAYANAN PONEK","PEMAKAIAN APAR","PEMASANGAN INFUS",
+  "PEMASANGAN NGT & OGT","PEMERIKSAAN CTA",
+  "PENCAMPURAN OBAT","PENANGANAN PASIEN HIV",
+  "PENGGUNAAN SPILLKIT","PENGUKURAN ANTROPOMETRI ANAK DAN PEMBACAAN GRAFIK PERTUMBUHAN ANAK",
+  "PENINGKATAN MUTU & KESELAMATAN PASIEN (PMKP)","PERATURAN PERUSAHAAN",
+  "PERPAJAKAN","PERNYIAPAN OBAT DAN ASEPTIK","PKBRS","PMKP UNTUK PARA PENGUMPUL DATA",
+  "PMKP UNTUK PARA PIMPINAN","PPI DASAR","PPI LANJUTAN","PROFIL RUMAH SAKIT",
+  "REGULASI TRANSPLANTASI ORGAN DAN DONASI","RESUSITASI","RESUSITASI BAYI",
+  "SAPA TALK","SERVICE EXCELLENT","SIMULASI EVAKUASI","SKORING EWS",
+  "STAF MENJAGA KESEHATAN DAN KESELAMATAN KERJA","STUNTING","TB - DOTS",
+  "TRAINING KBPP","TRAINING PONEK","TRIASE & ASUHAN","UNIT DOSE DISPENSING (UDD)",
+  "VALIDASI DAN VERIFIKASI HASIL QC DENGAN LEVEY JENNINGS",
+  "MANAJEMEN PENGELOLAAN PERALATAN KESEHATAN SERTA MEKANISME REGISTRASI DAN IZIN PENYELENGARAAN PRAKTIK KERJA"
+];
+
 // ===== MASTER REFERENSI (Bagian / Unit / Jabatan) =====
 async function renderAdminReferensi() {
   const el = document.getElementById('adminTabReferensi');
@@ -3772,6 +4494,7 @@ async function renderAdminReferensi() {
     return;
   }
   await loadMasterReferensi();
+  await refLoadIHT();
   refRender();
 }
 
@@ -3779,18 +4502,20 @@ function refRender() {
   const el = document.getElementById('adminTabReferensi');
   if (!el) return;
   const categories = [
-    { key: 'bagian',  label: 'Bagian',  data: KAR_BAGIAN  },
-    { key: 'unit',    label: 'Unit',    data: KAR_UNIT    },
-    { key: 'jabatan', label: 'Jabatan', data: KAR_JABATAN },
+    { key: 'bagian',  label: 'Bagian',  icon: '🏢', data: KAR_BAGIAN  },
+    { key: 'unit',    label: 'Unit',    icon: '🔬', data: KAR_UNIT    },
+    { key: 'jabatan', label: 'Jabatan', icon: '💼', data: KAR_JABATAN },
   ];
   el.innerHTML = `
     <div style="margin-bottom:12px;padding:10px 14px;background:#e8f5e9;border-radius:10px;font-size:12px;color:#2e7d32;line-height:1.5;">
-      ✅ Data <strong>Bagian, Unit, dan Jabatan</strong> disimpan di Supabase tabel <code>master_referensi</code> — semua admin melihat data yang sama.
+      ✅ Data <strong>Bagian, Unit, Jabatan, dan In House Training</strong> disimpan di Supabase — semua admin melihat data yang sama.
     </div>
+
+    <!-- BAGIAN / UNIT / JABATAN -->
     ${categories.map(c => `
       <div style="margin-bottom:18px;border:1.5px solid #eee;border-radius:12px;overflow:hidden;">
         <div style="background:#f5f5f5;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
-          <strong style="font-size:.9rem;color:#333;">🏷 ${c.label} <span style="font-weight:400;color:#888;font-size:.8rem;">(${c.data.length} item)</span></strong>
+          <strong style="font-size:.9rem;color:#333;">${c.icon} ${c.label} <span style="font-weight:400;color:#888;font-size:.8rem;">(${c.data.length} item)</span></strong>
           <button onclick="refShowAdd('${c.key}')" style="background:#27AE60;color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:.78rem;cursor:pointer;">+ Tambah</button>
         </div>
         <div id="refAddForm_${c.key}" style="display:none;padding:10px 14px;background:#f9fff9;border-bottom:1px solid #eee;">
@@ -3811,6 +4536,151 @@ function refRender() {
         </div>
       </div>
     `).join('')}
+
+    <!-- IN HOUSE TRAINING -->
+    <div style="margin-bottom:18px;border:1.5px solid #ffe0c0;border-radius:12px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#fff5ee,#ffe8d0);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <strong style="font-size:.9rem;color:#e86b1a;">📋 In House Training <span style="font-weight:400;color:#bbb;font-size:.8rem;">(${IHT_LIST.length} item)</span></strong>
+        <div style="display:flex;gap:6px;">
+          <button onclick="refIHTSeedDefault()" style="background:#F47920;color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;cursor:pointer;" title="Muat ulang 64 data default dari Excel">🔄 Seed Default</button>
+          <button onclick="refShowAdd('iht')" style="background:#27AE60;color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:.78rem;cursor:pointer;">+ Tambah</button>
+        </div>
+      </div>
+      <div id="refAddForm_iht" style="display:none;padding:10px 14px;background:#fff9f5;border-bottom:1px solid #ffe8d0;">
+        <div style="display:flex;gap:8px;">
+          <input id="refAddInput_iht" type="text" placeholder="Nama In House Training baru..." style="flex:1;padding:7px 10px;border:1.5px solid #ffc89a;border-radius:7px;font-size:.85rem;outline:none;">
+          <button onclick="refAdd('iht')" style="background:#F47920;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:.82rem;cursor:pointer;">✓ Simpan</button>
+          <button onclick="refHideAdd('iht')" style="background:#eee;color:#555;border:none;border-radius:7px;padding:7px 10px;font-size:.82rem;cursor:pointer;">✕</button>
+        </div>
+      </div>
+      <!-- Search IHT -->
+      <div style="padding:8px 14px;border-bottom:1px solid #fff0e0;background:#fffaf7;">
+        <input type="text" id="refIHTSearch" placeholder="🔍 Cari nama IHT..." oninput="refIHTFilter()"
+          style="width:100%;padding:6px 10px;border:1.5px solid #ffe0c0;border-radius:7px;font-size:.82rem;outline:none;box-sizing:border-box;">
+      </div>
+      <div id="refIHTList" style="max-height:280px;overflow-y:auto;">
+        ${IHT_LIST.map((item, i) => `
+          <div class="ref-iht-item" style="display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid #fff5ee;font-size:.83rem;color:#333;">
+            <span style="color:#bbb;min-width:28px;font-size:.75rem;">${i+1}.</span>
+            <span style="flex:1;">${escHtml(item)}</span>
+            <button onclick="refDelete('iht','${escAttr(item)}')" style="background:none;border:1px solid #ffcdd2;color:#e53935;border-radius:5px;padding:2px 8px;font-size:.72rem;cursor:pointer;">✕</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ===== RENDER SINGLE REFERENSI TAB (Bagian / Unit / Jabatan) =====
+async function renderAdminRefSingle(jenis) {
+  const elId = 'adminTab' + jenis.charAt(0).toUpperCase() + jenis.slice(1);
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = '<div style="padding:16px;color:#888;font-size:.85rem;">⏳ Memuat data…</div>';
+  if(!sbReady()) {
+    el.innerHTML = '<div style="padding:16px;color:#e53935;font-size:.85rem;">⚠️ Supabase belum dikonfigurasi.</div>';
+    return;
+  }
+  await loadMasterReferensi();
+  const meta = {
+    bagian:  { label:'Bagian',  icon:'🏢', data: KAR_BAGIAN  },
+    unit:    { label:'Unit',    icon:'🔬', data: KAR_UNIT    },
+    jabatan: { label:'Jabatan', icon:'💼', data: KAR_JABATAN },
+  };
+  const c = meta[jenis];
+  el.innerHTML = `
+    <div style="margin-bottom:10px;padding:8px 12px;background:#e8f5e9;border-radius:8px;font-size:11px;color:#2e7d32;">
+      ✅ Data disimpan di Supabase — semua admin melihat data yang sama.
+    </div>
+    <div style="border:1.5px solid #eee;border-radius:12px;overflow:hidden;">
+      <div style="background:#f5f5f5;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <strong style="font-size:.9rem;color:#333;">${c.icon} ${c.label} <span style="font-weight:400;color:#888;font-size:.8rem;">(${c.data.length} item)</span></strong>
+        <button onclick="refShowAdd('${jenis}')" style="background:#27AE60;color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:.78rem;cursor:pointer;">+ Tambah</button>
+      </div>
+      <div id="refAddForm_${jenis}" style="display:none;padding:10px 14px;background:#f9fff9;border-bottom:1px solid #eee;">
+        <div style="display:flex;gap:8px;">
+          <input id="refAddInput_${jenis}" type="text" placeholder="Nama ${c.label} baru..." style="flex:1;padding:7px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:.85rem;outline:none;">
+          <button onclick="refAdd('${jenis}')" style="background:#27AE60;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:.82rem;cursor:pointer;">✓ Simpan</button>
+          <button onclick="refHideAdd('${jenis}')" style="background:#eee;color:#555;border:none;border-radius:7px;padding:7px 10px;font-size:.82rem;cursor:pointer;">✕</button>
+        </div>
+      </div>
+      <div style="max-height:400px;overflow-y:auto;">
+        ${c.data.length === 0
+          ? '<div style="padding:20px;text-align:center;color:#bbb;font-size:.85rem;">Belum ada data</div>'
+          : c.data.map((item, i) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid #f5f5f5;font-size:.83rem;color:#333;">
+              <span style="color:#bbb;min-width:22px;font-size:.75rem;">${i+1}.</span>
+              <span style="flex:1;">${escHtml(item)}</span>
+              <button onclick="refDeleteSingle('${jenis}','${escAttr(item)}')" style="background:none;border:1px solid #ffcdd2;color:#e53935;border-radius:5px;padding:2px 8px;font-size:.72rem;cursor:pointer;">✕</button>
+            </div>
+          `).join('')
+        }
+      </div>
+    </div>
+  `;
+}
+
+// Wrapper delete yang re-render tab single (bukan semua referensi)
+async function refDeleteSingle(jenis, nama) {
+  if(!confirm(`Hapus "${nama}" dari daftar ${jenis}?`)) return;
+  try {
+    await sbFetch('master_referensi?jenis=eq.' + encodeURIComponent(jenis) + '&nama=eq.' + encodeURIComponent(nama), { method: 'DELETE' });
+    const list = jenis==='bagian' ? KAR_BAGIAN : jenis==='unit' ? KAR_UNIT : KAR_JABATAN;
+    const idx = list.indexOf(nama);
+    if(idx > -1) list.splice(idx, 1);
+    renderAdminRefSingle(jenis);
+  } catch(e) { alert('Gagal hapus: ' + e.message); }
+}
+
+// ===== RENDER DAFTAR DIKLAT TAB =====
+async function renderAdminDaftarDiklat() {
+  const el = document.getElementById('adminTabDaftarDiklat');
+  if(!el) return;
+  el.innerHTML = '<div style="padding:16px;color:#888;font-size:.85rem;">⏳ Memuat data…</div>';
+  if(!sbReady()) {
+    el.innerHTML = '<div style="padding:16px;color:#e53935;font-size:.85rem;">⚠️ Supabase belum dikonfigurasi.</div>';
+    return;
+  }
+  await refLoadIHT();
+  refRenderDaftarDiklat();
+}
+
+function refRenderDaftarDiklat() {
+  const el = document.getElementById('adminTabDaftarDiklat');
+  if(!el) return;
+  el.innerHTML = `
+    <div style="margin-bottom:10px;padding:8px 12px;background:#fff5ee;border-radius:8px;font-size:11px;color:#e86b1a;border:1px solid #ffe0c0;">
+      ✅ Daftar nama Diklat/IHT disimpan di Supabase — digunakan sebagai referensi di menu Input.
+    </div>
+    <div style="border:1.5px solid #ffe0c0;border-radius:12px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#fff5ee,#ffe8d0);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <strong style="font-size:.9rem;color:#e86b1a;">📋 Daftar Diklat <span style="font-weight:400;color:#bbb;font-size:.8rem;">(${IHT_LIST.length} item)</span></strong>
+        <div style="display:flex;gap:6px;">
+          <button onclick="refIHTSeedDefault()" style="background:#F47920;color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;cursor:pointer;" title="Muat ulang 64 data default">🔄 Seed Default</button>
+          <button onclick="refShowAdd('iht')" style="background:#27AE60;color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:.78rem;cursor:pointer;">+ Tambah</button>
+        </div>
+      </div>
+      <div id="refAddForm_iht" style="display:none;padding:10px 14px;background:#fff9f5;border-bottom:1px solid #ffe8d0;">
+        <div style="display:flex;gap:8px;">
+          <input id="refAddInput_iht" type="text" placeholder="Nama Diklat baru..." style="flex:1;padding:7px 10px;border:1.5px solid #ffc89a;border-radius:7px;font-size:.85rem;outline:none;">
+          <button onclick="refAdd('iht')" style="background:#F47920;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:.82rem;cursor:pointer;">✓ Simpan</button>
+          <button onclick="refHideAdd('iht')" style="background:#eee;color:#555;border:none;border-radius:7px;padding:7px 10px;font-size:.82rem;cursor:pointer;">✕</button>
+        </div>
+      </div>
+      <div style="padding:8px 14px;border-bottom:1px solid #fff0e0;background:#fffaf7;">
+        <input type="text" id="refIHTSearch" placeholder="🔍 Cari nama diklat..." oninput="refIHTFilter()"
+          style="width:100%;padding:6px 10px;border:1.5px solid #ffe0c0;border-radius:7px;font-size:.82rem;outline:none;box-sizing:border-box;">
+      </div>
+      <div id="refIHTList" style="max-height:380px;overflow-y:auto;">
+        ${IHT_LIST.map((item, i) => `
+          <div class="ref-iht-item" style="display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid #fff5ee;font-size:.83rem;color:#333;">
+            <span style="color:#bbb;min-width:28px;font-size:.75rem;">${i+1}.</span>
+            <span style="flex:1;">${escHtml(item)}</span>
+            <button onclick="refDelete('iht','${escAttr(item)}')" style="background:none;border:1px solid #ffcdd2;color:#e53935;border-radius:5px;padding:2px 8px;font-size:.72rem;cursor:pointer;">✕</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
   `;
 }
 
@@ -3827,28 +4697,107 @@ async function refAdd(jenis) {
   const inp = document.getElementById('refAddInput_' + jenis);
   const nama = inp.value.trim().toUpperCase();
   if (!nama) return;
-  // Cek duplikat di list lokal
-  const list = jenis==='bagian' ? KAR_BAGIAN : jenis==='unit' ? KAR_UNIT : KAR_JABATAN;
+  const list = jenis==='bagian' ? KAR_BAGIAN : jenis==='unit' ? KAR_UNIT : jenis==='jabatan' ? KAR_JABATAN : IHT_LIST;
   if (list.includes(nama)) { alert(`"${nama}" sudah ada di daftar ${jenis}.`); return; }
   try {
-    await sbFetch('master_referensi', { method: 'POST', body: JSON.stringify({ jenis, nama }) });
+    const tabel = jenis === 'iht' ? 'master_iht' : 'master_referensi';
+    const body  = jenis === 'iht' ? JSON.stringify({ nama }) : JSON.stringify({ jenis, nama });
+    await sbFetch(tabel, { method: 'POST', body });
     list.push(nama);
     list.sort();
     inp.value = '';
     refHideAdd(jenis);
-    refRender();
+    // Re-render tab yang sesuai
+    if(jenis === 'iht') refRenderDaftarDiklat();
+    else renderAdminRefSingle(jenis);
   } catch(e) { alert('Gagal menyimpan: ' + e.message); }
 }
 
 async function refDelete(jenis, nama) {
   if (!confirm(`Hapus "${nama}" dari daftar ${jenis}?`)) return;
   try {
-    await sbFetch('master_referensi?jenis=eq.' + encodeURIComponent(jenis) + '&nama=eq.' + encodeURIComponent(nama), { method: 'DELETE' });
-    const list = jenis==='bagian' ? KAR_BAGIAN : jenis==='unit' ? KAR_UNIT : KAR_JABATAN;
-    const idx = list.indexOf(nama);
-    if (idx > -1) list.splice(idx, 1);
-    refRender();
+    if (jenis === 'iht') {
+      await sbFetch('master_iht?nama=eq.' + encodeURIComponent(nama), { method: 'DELETE' });
+      const idx = IHT_LIST.indexOf(nama);
+      if (idx > -1) IHT_LIST.splice(idx, 1);
+      refRenderDaftarDiklat();
+    } else {
+      await sbFetch('master_referensi?jenis=eq.' + encodeURIComponent(jenis) + '&nama=eq.' + encodeURIComponent(nama), { method: 'DELETE' });
+      const list = jenis==='bagian' ? KAR_BAGIAN : jenis==='unit' ? KAR_UNIT : KAR_JABATAN;
+      const idx = list.indexOf(nama);
+      if (idx > -1) list.splice(idx, 1);
+      renderAdminRefSingle(jenis);
+    }
   } catch(e) { alert('Gagal hapus: ' + e.message); }
+}
+
+// Load daftar IHT dari Supabase (tabel master_iht)
+async function refLoadIHT() {
+  if (!sbReady()) return;
+  try {
+    const rows = await sbFetch('master_iht?select=nama&order=nama.asc');
+    if (rows && rows.length > 0) {
+      IHT_LIST = rows.map(r => r.nama);
+    } else {
+      // Tabel kosong → seed 64 data default
+      await refIHTSeedDefault(true);
+    }
+  } catch(e) {
+    console.warn('refLoadIHT gagal, pakai data lokal:', e.message);
+  }
+}
+
+// Seed 64 data default ke Supabase (dipanggil sekali saat tabel masih kosong)
+async function refIHTSeedDefault(silent = false) {
+  if (!silent && !confirm('Ini akan menghapus semua data IHT di Supabase dan mengisi ulang dengan 64 data default. Lanjutkan?')) return;
+  const DEFAULT_IHT = [
+    "ALUR PELAYANAN HIV","ALUR PENGADAAN","ASEPTIC DISPENCING","ASESOR KLINIK",
+    "ASUHAN KEPERAWATAN","ASSESMENT NYERI","BANTUAN HIDUP DASAR (BHD)","BEAUTY CLASS",
+    "CODE BLUE","DIKLAT PPI UNTUK PENGUMPUL DATA IPCLN","HAK DAN KEWAJIBAN PASIEN","HIV",
+    "INVESTIGASI SEDERHANA, RCA, FMEA","K3 LANJUTAN",
+    "K3RS (Bencana Alam, Kebakaran, APAR, Mitigasi Bencana)",
+    "KERAHASIAAN INFORMASI PASIEN DI PENUNJANG MEDIS","KOMUNIKASI EFEKTIF",
+    "MANAJEMEN ASUHAN KEPERAWATAN PROFESIONAL (MAKP)","MANAJEMEN KLAIM TERINTEGRASI",
+    "MANAJEMEN PERALATAN MEDIS","MANAJEMEN RESIKO","MANAJEMEN UTILITAS",
+    "MEDICATION ERROR","MENUMBUHKAN JIWA HOSPITALPRENEUR PADA KARYAWAN RS DKH CIBADAK",
+    "MITIGASI BENCANA","MODEL PEMASANGAN KATETER","PATIENT SAFETY","PELAKSANAAN SIM RS",
+    "PELAYANAN GERIATRI","PELAYANAN PONEK","PEMAKAIAN APAR","PEMASANGAN INFUS",
+    "PEMASANGAN NGT & OGT","PEMERIKSAAN CTA","PENCAMPURAN OBAT","PENANGANAN PASIEN HIV",
+    "PENGGUNAAN SPILLKIT","PENGUKURAN ANTROPOMETRI ANAK DAN PEMBACAAN GRAFIK PERTUMBUHAN ANAK",
+    "PENINGKATAN MUTU & KESELAMATAN PASIEN (PMKP)","PERATURAN PERUSAHAAN",
+    "PERPAJAKAN","PERNYIAPAN OBAT DAN ASEPTIK","PKBRS","PMKP UNTUK PARA PENGUMPUL DATA",
+    "PMKP UNTUK PARA PIMPINAN","PPI DASAR","PPI LANJUTAN","PROFIL RUMAH SAKIT",
+    "REGULASI TRANSPLANTASI ORGAN DAN DONASI","RESUSITASI","RESUSITASI BAYI",
+    "SAPA TALK","SERVICE EXCELLENT","SIMULASI EVAKUASI","SKORING EWS",
+    "STAF MENJAGA KESEHATAN DAN KESELAMATAN KERJA","STUNTING","TB - DOTS",
+    "TRAINING KBPP","TRAINING PONEK","TRIASE & ASUHAN","UNIT DOSE DISPENSING (UDD)",
+    "VALIDASI DAN VERIFIKASI HASIL QC DENGAN LEVEY JENNINGS",
+    "MANAJEMEN PENGELOLAAN PERALATAN KESEHATAN SERTA MEKANISME REGISTRASI DAN IZIN PENYELENGARAAN PRAKTIK KERJA"
+  ];
+  try {
+    // Hapus semua lalu insert ulang
+    await sbFetch('master_iht?nama=neq.PLACEHOLDER_HAPUS_SEMUA', { method: 'DELETE' });
+    for (let i = 0; i < DEFAULT_IHT.length; i += 20) {
+      const batch = DEFAULT_IHT.slice(i, i + 20).map(nama => ({ nama }));
+      await sbFetch('master_iht', { method: 'POST', body: JSON.stringify(batch) });
+    }
+    IHT_LIST = [...DEFAULT_IHT].sort();
+    if (!silent) { alert('✅ 64 data IHT berhasil di-seed ke Supabase!'); refRenderDaftarDiklat(); }
+  } catch(e) {
+    if (!silent) alert('Gagal seed: ' + e.message);
+  }
+}
+
+// Filter pencarian di daftar IHT
+function refIHTFilter() {
+  const q = (document.getElementById('refIHTSearch')?.value || '').toLowerCase();
+  const items = document.querySelectorAll('.ref-iht-item');
+  let visible = 0;
+  items.forEach(el => {
+    const match = el.textContent.toLowerCase().includes(q);
+    el.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
 }
 
 // Init
