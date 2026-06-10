@@ -644,13 +644,64 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
   font-weight: 600;
 }
 .kar-add-wrap button:hover { background: #1E8449; }
+.kar-form-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  margin-bottom: 10px;
+}
+.kar-form-grid input, .kar-form-grid select {
+  padding: 9px 12px; border: 1.5px solid #ddd;
+  border-radius: 8px; font-size: .84rem;
+  box-sizing: border-box; outline: none;
+  font-family: 'Poppins', sans-serif;
+  background: #fff;
+}
+.kar-form-grid input:focus, .kar-form-grid select:focus { border-color: #e86b1a; }
+.kar-form-grid .full-col { grid-column: 1 / -1; }
+.kar-form-submit {
+  width: 100%; background: #27AE60; color: #fff; border: none;
+  border-radius: 8px; padding: 10px; font-size: .88rem;
+  cursor: pointer; font-weight: 700; margin-top: 2px;
+}
+.kar-form-submit:hover { background: #1E8449; }
+
+/* Searchable dropdown */
+.kar-dd-wrap {
+  position: relative;
+}
+.kar-dd-input {
+  width: 100%; padding: 9px 30px 9px 12px;
+  border: 1.5px solid #ddd; border-radius: 8px;
+  font-size: .84rem; box-sizing: border-box;
+  outline: none; font-family: 'Poppins', sans-serif;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23999' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center;
+  cursor: text;
+  color: #999;
+}
+.kar-dd-input:focus { border-color: #e86b1a; box-shadow: 0 0 0 3px rgba(232,107,26,0.1); color: #222; }
+.kar-dd-input.has-value { color: #222; }
+.kar-dd-list {
+  position: absolute; top: calc(100% + 3px); left: 0; right: 0;
+  background: #fff; border: 1.5px solid #e86b1a;
+  border-radius: 8px; z-index: 999;
+  max-height: 200px; overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  display: none;
+}
+.kar-dd-list.open { display: block; }
+.kar-dd-option {
+  padding: 8px 12px; font-size: .82rem; cursor: pointer;
+  color: #333; transition: background .1s;
+}
+.kar-dd-option:hover { background: #fff3e0; color: #e86b1a; }
+.kar-dd-option.selected { background: #fff8f2; font-weight: 600; color: #e86b1a; }
+.kar-dd-empty { padding: 10px 12px; font-size: .78rem; color: #aaa; font-style: italic; }
 .kar-list-wrap {
   border: 1px solid #eee; border-radius: 10px;
   overflow: hidden; max-height: 320px; overflow-y: auto;
 }
 .kar-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 14px; border-bottom: 1px solid #f5f5f5;
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid #f5f5f5;
   font-size: .85rem; color: #333;
   transition: background .12s;
 }
@@ -658,11 +709,18 @@ body{font-family:'Poppins',sans-serif;background:#d8d8d8;min-height:100vh;displa
 .kar-item:hover { background: #fafafa; }
 .kar-item-num {
   color: #ccc; font-size: .75rem; min-width: 24px;
-  font-weight: 700; flex-shrink: 0;
+  font-weight: 700; flex-shrink: 0; padding-top: 2px;
 }
 .kar-item-name { flex: 1; }
 .kar-item-dept {
   font-size: .72rem; color: #aaa; margin-top: 1px;
+}
+.kar-item-meta {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;
+}
+.kar-meta-chip {
+  background: #f5f5f5; border-radius: 4px;
+  padding: 1px 7px; font-size: .68rem; color: #666;
 }
 .kar-resign-btn {
   background: #fff; border: 1px solid #e53935;
@@ -1691,6 +1749,7 @@ function renderAdminContent() {
       <button class="admin-tab" onclick="switchAdminTab('ttd',this)">✍️ TTD</button>
       <button class="admin-tab" onclick="switchAdminTab('iht',this)">🗓 IHT</button>
       <button class="admin-tab" onclick="switchAdminTab('karyawan',this)">👥 Karyawan</button>
+      <button class="admin-tab" onclick="switchAdminTab('referensi',this)">🏷 Referensi</button>
     </div>
     <div id="adminTabPeserta" style="padding:12px 0;overflow-y:auto;max-height:65vh;"></div>
     <div id="adminTabInput" style="display:none;padding:12px 16px;overflow-y:auto;max-height:65vh;"></div>
@@ -1698,6 +1757,7 @@ function renderAdminContent() {
     <div id="adminTabTTD" style="padding:12px 0;overflow-y:auto;max-height:65vh;"></div>
     <div id="adminTabIHT" style="display:none;overflow-y:auto;max-height:65vh;"></div>
     <div id="adminTabKaryawan" style="display:none;padding:12px 16px;overflow-y:auto;max-height:65vh;"></div>
+    <div id="adminTabReferensi" style="display:none;padding:12px 16px;overflow-y:auto;max-height:65vh;"></div>
   `;
   renderAdminPeserta();
   renderAdminQR();
@@ -2042,9 +2102,11 @@ function switchAdminTab(tab, btn) {
   document.getElementById('adminTabTTD').style.display = tab==='ttd'?'block':'none';
   document.getElementById('adminTabIHT').style.display = tab==='iht'?'block':'none';
   document.getElementById('adminTabKaryawan').style.display = tab==='karyawan'?'block':'none';
+  document.getElementById('adminTabReferensi').style.display = tab==='referensi'?'block':'none';
   if(tab==='input') renderAdminInput();
   if(tab==='iht') renderAdminIHT();
   if(tab==='karyawan') renderAdminKaryawan();
+  if(tab==='referensi') renderAdminReferensi();
 }
 
 function renderAdminPeserta() {
@@ -2712,59 +2774,299 @@ async function submitIhtForm() {
   }
 }
 
-// ===== KARYAWAN (MASTER DATA KARYAWAN) =====
-// Data tersimpan di Supabase tabel 'karyawan'
-// Struktur tabel: id (int8/serial), nama (text), dept (text), aktif (bool default true), tanggal_resign (date nullable)
-// SQL untuk buat tabel:
-//   create table karyawan (
-//     id bigint generated always as identity primary key,
-//     nama text not null,
-//     dept text default '',
-//     aktif boolean default true,
-//     tanggal_resign date
-//   );
+// ===== KARYAWAN MASTER LISTS (dinamis dari Supabase) =====
+// Data default (fallback jika Supabase belum dimuat)
+let KAR_BAGIAN = [
+  "DIREKTUR","K3RS","KEPERAWATAN","KEUANGAN & AKUNTANSI","PELAYANAN MEDIS",
+  "PEMASARAN & MUTU","PENUNJANG MEDIS","PPI","SATUAN PENGAWAS INTERNAL (SPI)",
+  "TIM PMKP","UMUM DAN PERSONALIA"
+];
+let KAR_UNIT = [
+  "AKUNTANSI","AMETHYST","AQUAMARINE","ATEM","BAGIAN KEPERAWATAN",
+  "BAGIAN KEUANGAN & AKUNTANSI","BAGIAN PELAYANAN MEDIS","BAGIAN PENUNJANG MEDIS",
+  "BAGIAN UMUM & PERSONALIA","CASEMIX","CUSTOMER SERVICE","DEPO RAWAT INAP",
+  "DEPO RAWAT JALAN","DIREKTUR","DOKTER UMUM","DRIVER","GUDANG FARMASI","HUMAS",
+  "ICT","ICU","IGD","IGD KEBIDANAN","INSTALASI FARMASI","INSTALASI GIZI",
+  "INSTALASI REKAM MEDIK & PENDAFTARAN","KASIR","KEUANGAN","LABORATORIUM","LAUNDRY",
+  "MAINTENANCE","MANAJEMEN PELAYANAN PASIEN (MPP)","MUTU & KEPATUHAN","OK","ORIENTASI",
+  "PANTRY","PEMASARAN","PEMASARAN & MUTU","PENDAFTARAN","PENGADAAN","PERINATOLOGI",
+  "PERSONALIA","POLIKLINIK","PPI","PSRS","RADIOLOGI","REKAM MEDIS","RUBY",
+  "RUMAH TANGGA","SATPAM","SATUAN PENGAWAS INTERNAL (SPI)","TIM K3","TIM PMKP",
+  "UMUM","VK","ZAMBRUD"
+];
+let KAR_JABATAN = [
+  "ADMIN FARMASI","ADMIN KASIR","AHLI GIZI","ANALIS","APOTEKER","ASSISTEN APOTEKER",
+  "ATEM","BIDAN","CS","CSSD","CUSTOMER SERVICE","DIREKTUR","DOKTER CASEMIX",
+  "DOKTER UMUM","DOKTER UMUM & IPCD","DOKTER UMUM & KEPALA INSTALASI GAWAT DARURAT",
+  "DOKTER UMUM & KEPALA INSTALASI ICU & PERINATOLOGI","DOKTER UMUM & KEPALA INSTALASI OK & VK",
+  "DOKTER UMUM & KEPALA INSTALASI RAWAT INAP","DRIVER","HELPER","IPCN",
+  "KEPALA BAGIAN KEPERAWATAN","KEPALA BAGIAN KEUANGAN & AKUNTANSI",
+  "KEPALA BAGIAN PELAYANAN MEDIS","KEPALA BAGIAN PEMASARAN & MUTU",
+  "KEPALA BAGIAN UMUM & PERSONALIA","KEPALA INSTALASI FARMASI","KEPALA INSTALASI GIZI",
+  "KEPALA INSTALASI RAWAT DOKTER UMUM & JALAN","KEPALA INSTALASI REKAM MEDIK DAN PENDAFTARAN",
+  "KEPALA PENUNJANG MEDIS & KETUA KOMITE KEPERAWATAN","KEPALA UNIT AKUNTANSI",
+  "KEPALA UNIT ASUHAN KEPERAWATAN","KEPALA UNIT CASEMIX","KEPALA UNIT HUMAS",
+  "KEPALA UNIT ICT","KEPALA UNIT KEUANGAN","KEPALA UNIT MANAJEMEN KEPERAWATAN",
+  "KEPALA UNIT MUTU & KEPATUHAN","KEPALA UNIT PEMASARAN","KEPALA UNIT PENGADAAN",
+  "KEPALA UNIT PERSONALIA","KEPALA UNIT UMUM","KEPALA URUSAN AMETHYST",
+  "KEPALA URUSAN AQUAMARINE","KEPALA URUSAN DEPO FARMASI","KEPALA URUSAN DIKLAT & KOMPETENSI",
+  "KEPALA URUSAN DRIVER","KEPALA URUSAN FARMASI RAWAT JALAN","KEPALA URUSAN GUDANG FARMASI",
+  "KEPALA URUSAN ICU","KEPALA URUSAN IGD","KEPALA URUSAN IGD KEBIDANAN",
+  "KEPALA URUSAN KAS KECIL","KEPALA URUSAN KASIR","KEPALA URUSAN KEPEGAWAIAN",
+  "KEPALA URUSAN LABORATORIUM","KEPALA URUSAN LAUNDRY","KEPALA URUSAN MAINTENANCE",
+  "KEPALA URUSAN OK","KEPALA URUSAN PEMASARAN EKSTERNAL","KEPALA URUSAN PEMASARAN INTERNAL",
+  "KEPALA URUSAN PENDAFTARAN","KEPALA URUSAN PERINATOLOGI","KEPALA URUSAN PIUTANG",
+  "KEPALA URUSAN POLIKLINIK","KEPALA URUSAN PSRS","KEPALA URUSAN RADIOLOGI",
+  "KEPALA URUSAN REKAM MEDIK","KEPALA URUSAN RUBY","KEPALA URUSAN RUMAH TANGGA",
+  "KEPALA URUSAN SATPAM","KEPALA URUSAN VK","KEPALA URUSAN ZAMBRUD","KETUA TIM K3",
+  "KETUA TIM PMKP","KOKI GIZI","KURIR","MAINTENANCE","MANAJEMEN PELAYANAN PASIEN (MPP)",
+  "OFFICE BOY","PENANGGUNG JAWAB CSSD","PENDAFTARAN","PERAWAT","PEREKAM MEDIK",
+  "PET. PANTRY","PETUGAS LAUNDRY","PETUGAS RM","RADIOGRAFER","SATPAM",
+  "SATUAN PENGAWAS INTERNAL (SPI)","STAFF ICT","STAFF PEMASARAN EKSTERNAL",
+  "STAFF PENGADAAN","STAFF SATUAN PENGAWAS INTERNAL (SPI)","TERAPIS GIGI DAN MULUT",
+  "TIM CASEMIX"
+];
 
-let karCache = [];      // cache hasil load dari Supabase
+// ===== LOAD MASTER REFERENSI DARI SUPABASE =====
+async function loadMasterReferensi() {
+  if (!sbReady()) return; // Supabase belum siap, pakai data default
+  try {
+    const rows = await sbFetch('master_referensi?select=jenis,nama&order=jenis.asc,nama.asc');
+    if (!rows || rows.length === 0) {
+      // Tabel kosong → seed data default ke Supabase
+      await seedMasterReferensi();
+      return;
+    }
+    const bagian  = rows.filter(r => r.jenis === 'bagian').map(r => r.nama);
+    const unit    = rows.filter(r => r.jenis === 'unit').map(r => r.nama);
+    const jabatan = rows.filter(r => r.jenis === 'jabatan').map(r => r.nama);
+    if (bagian.length)  KAR_BAGIAN  = bagian;
+    if (unit.length)    KAR_UNIT    = unit;
+    if (jabatan.length) KAR_JABATAN = jabatan;
+  } catch(e) {
+    console.warn('loadMasterReferensi gagal, pakai data lokal:', e.message);
+  }
+}
+
+// Seed data default ke tabel master_referensi (hanya dipanggil sekali saat tabel masih kosong)
+async function seedMasterReferensi() {
+  const DEFAULT_BAGIAN = [
+    "DIREKTUR","K3RS","KEPERAWATAN","KEUANGAN & AKUNTANSI","PELAYANAN MEDIS",
+    "PEMASARAN & MUTU","PENUNJANG MEDIS","PPI","SATUAN PENGAWAS INTERNAL (SPI)",
+    "TIM PMKP","UMUM DAN PERSONALIA"
+  ];
+  const DEFAULT_UNIT = [
+    "AKUNTANSI","AMETHYST","AQUAMARINE","ATEM","BAGIAN KEPERAWATAN",
+    "BAGIAN KEUANGAN & AKUNTANSI","BAGIAN PELAYANAN MEDIS","BAGIAN PENUNJANG MEDIS",
+    "BAGIAN UMUM & PERSONALIA","CASEMIX","CUSTOMER SERVICE","DEPO RAWAT INAP",
+    "DEPO RAWAT JALAN","DIREKTUR","DOKTER UMUM","DRIVER","GUDANG FARMASI","HUMAS",
+    "ICT","ICU","IGD","IGD KEBIDANAN","INSTALASI FARMASI","INSTALASI GIZI",
+    "INSTALASI REKAM MEDIK & PENDAFTARAN","KASIR","KEUANGAN","LABORATORIUM","LAUNDRY",
+    "MAINTENANCE","MANAJEMEN PELAYANAN PASIEN (MPP)","MUTU & KEPATUHAN","OK","ORIENTASI",
+    "PANTRY","PEMASARAN","PEMASARAN & MUTU","PENDAFTARAN","PENGADAAN","PERINATOLOGI",
+    "PERSONALIA","POLIKLINIK","PPI","PSRS","RADIOLOGI","REKAM MEDIS","RUBY",
+    "RUMAH TANGGA","SATPAM","SATUAN PENGAWAS INTERNAL (SPI)","TIM K3","TIM PMKP",
+    "UMUM","VK","ZAMBRUD"
+  ];
+  const DEFAULT_JABATAN = [
+    "ADMIN FARMASI","ADMIN KASIR","AHLI GIZI","ANALIS","APOTEKER","ASSISTEN APOTEKER",
+    "ATEM","BIDAN","CS","CSSD","CUSTOMER SERVICE","DIREKTUR","DOKTER CASEMIX",
+    "DOKTER UMUM","DOKTER UMUM & IPCD","DOKTER UMUM & KEPALA INSTALASI GAWAT DARURAT",
+    "DOKTER UMUM & KEPALA INSTALASI ICU & PERINATOLOGI","DOKTER UMUM & KEPALA INSTALASI OK & VK",
+    "DOKTER UMUM & KEPALA INSTALASI RAWAT INAP","DRIVER","HELPER","IPCN",
+    "KEPALA BAGIAN KEPERAWATAN","KEPALA BAGIAN KEUANGAN & AKUNTANSI",
+    "KEPALA BAGIAN PELAYANAN MEDIS","KEPALA BAGIAN PEMASARAN & MUTU",
+    "KEPALA BAGIAN UMUM & PERSONALIA","KEPALA INSTALASI FARMASI","KEPALA INSTALASI GIZI",
+    "KEPALA INSTALASI RAWAT DOKTER UMUM & JALAN","KEPALA INSTALASI REKAM MEDIK DAN PENDAFTARAN",
+    "KEPALA PENUNJANG MEDIS & KETUA KOMITE KEPERAWATAN","KEPALA UNIT AKUNTANSI",
+    "KEPALA UNIT ASUHAN KEPERAWATAN","KEPALA UNIT CASEMIX","KEPALA UNIT HUMAS",
+    "KEPALA UNIT ICT","KEPALA UNIT KEUANGAN","KEPALA UNIT MANAJEMEN KEPERAWATAN",
+    "KEPALA UNIT MUTU & KEPATUHAN","KEPALA UNIT PEMASARAN","KEPALA UNIT PENGADAAN",
+    "KEPALA UNIT PERSONALIA","KEPALA UNIT UMUM","KEPALA URUSAN AMETHYST",
+    "KEPALA URUSAN AQUAMARINE","KEPALA URUSAN DEPO FARMASI","KEPALA URUSAN DIKLAT & KOMPETENSI",
+    "KEPALA URUSAN DRIVER","KEPALA URUSAN FARMASI RAWAT JALAN","KEPALA URUSAN GUDANG FARMASI",
+    "KEPALA URUSAN ICU","KEPALA URUSAN IGD","KEPALA URUSAN IGD KEBIDANAN",
+    "KEPALA URUSAN KAS KECIL","KEPALA URUSAN KASIR","KEPALA URUSAN KEPEGAWAIAN",
+    "KEPALA URUSAN LABORATORIUM","KEPALA URUSAN LAUNDRY","KEPALA URUSAN MAINTENANCE",
+    "KEPALA URUSAN OK","KEPALA URUSAN PEMASARAN EKSTERNAL","KEPALA URUSAN PEMASARAN INTERNAL",
+    "KEPALA URUSAN PENDAFTARAN","KEPALA URUSAN PERINATOLOGI","KEPALA URUSAN PIUTANG",
+    "KEPALA URUSAN POLIKLINIK","KEPALA URUSAN PSRS","KEPALA URUSAN RADIOLOGI",
+    "KEPALA URUSAN REKAM MEDIK","KEPALA URUSAN RUBY","KEPALA URUSAN RUMAH TANGGA",
+    "KEPALA URUSAN SATPAM","KEPALA URUSAN VK","KEPALA URUSAN ZAMBRUD","KETUA TIM K3",
+    "KETUA TIM PMKP","KOKI GIZI","KURIR","MAINTENANCE","MANAJEMEN PELAYANAN PASIEN (MPP)",
+    "OFFICE BOY","PENANGGUNG JAWAB CSSD","PENDAFTARAN","PERAWAT","PEREKAM MEDIK",
+    "PET. PANTRY","PETUGAS LAUNDRY","PETUGAS RM","RADIOGRAFER","SATPAM",
+    "SATUAN PENGAWAS INTERNAL (SPI)","STAFF ICT","STAFF PEMASARAN EKSTERNAL",
+    "STAFF PENGADAAN","STAFF SATUAN PENGAWAS INTERNAL (SPI)","TERAPIS GIGI DAN MULUT",
+    "TIM CASEMIX"
+  ];
+  try {
+    const rows = [
+      ...DEFAULT_BAGIAN.map(n  => ({ jenis: 'bagian',  nama: n })),
+      ...DEFAULT_UNIT.map(n    => ({ jenis: 'unit',    nama: n })),
+      ...DEFAULT_JABATAN.map(n => ({ jenis: 'jabatan', nama: n })),
+    ];
+    await sbFetch('master_referensi', { method: 'POST', body: JSON.stringify(rows) });
+    console.log('✅ Master referensi berhasil di-seed ke Supabase.');
+  } catch(e) {
+    console.warn('seedMasterReferensi gagal:', e.message);
+  }
+}
+
+// Searchable dropdown — input utama bisa diketik langsung untuk filter
+function karDropdown(id, options, placeholder) {
+  const wrap = document.getElementById(id + '_wrap');
+  if(!wrap) return;
+  const inputEl = wrap.querySelector('.kar-dd-input');
+  const listEl  = wrap.querySelector('.kar-dd-list');
+
+  function renderOptions(filter) {
+    const q = (filter||'').toLowerCase();
+    const filtered = q ? options.filter(o => o.toLowerCase().includes(q)) : options;
+    const cur = inputEl.dataset.value || '';
+    if(filtered.length === 0) {
+      listEl.innerHTML = '<div class="kar-dd-empty">Tidak ditemukan</div>';
+    } else {
+      listEl.innerHTML = filtered.map(o =>
+        `<div class="kar-dd-option${o===cur?' selected':''}" data-val="${escHtml(o)}">${escHtml(o)}</div>`
+      ).join('');
+      listEl.querySelectorAll('.kar-dd-option').forEach(optEl => {
+        optEl.addEventListener('mousedown', e => {
+          e.preventDefault();
+          selectVal(optEl.dataset.val);
+        });
+      });
+    }
+    // scroll selected into view
+    setTimeout(() => {
+      const sel = listEl.querySelector('.selected');
+      if(sel) sel.scrollIntoView({block:'nearest'});
+    }, 30);
+  }
+
+  function selectVal(val) {
+    inputEl.value = val;
+    inputEl.dataset.value = val;
+    inputEl.classList.add('has-value');
+    listEl.classList.remove('open');
+  }
+
+  function openList() {
+    // Kalau ada nilai terpilih, kosongkan teks input agar bisa filter ulang
+    if(inputEl.dataset.value) {
+      inputEl.value = '';
+    }
+    listEl.classList.add('open');
+    renderOptions('');
+  }
+
+  function closeList() {
+    listEl.classList.remove('open');
+    // Kembalikan label nilai terpilih kalau user tidak memilih apapun
+    if(inputEl.dataset.value) {
+      inputEl.value = inputEl.dataset.value;
+    }
+  }
+
+  // Klik pada input: buka list
+  inputEl.addEventListener('focus', () => openList());
+
+  // Mengetik di input: filter langsung
+  inputEl.addEventListener('input', () => {
+    // Kalau user mengetik, hilangkan nilai terpilih sementara
+    inputEl.dataset.value = '';
+    inputEl.classList.remove('has-value');
+    listEl.classList.add('open');
+    renderOptions(inputEl.value);
+  });
+
+  inputEl.addEventListener('keydown', e => {
+    if(e.key === 'Escape') { closeList(); inputEl.blur(); }
+    if(e.key === 'Enter') {
+      // Pilih opsi pertama yang tampil
+      const first = listEl.querySelector('.kar-dd-option');
+      if(first) selectVal(first.dataset.val);
+      inputEl.blur();
+    }
+  });
+
+  // Klik di luar: tutup dan restore
+  document.addEventListener('mousedown', e => {
+    if(!wrap.contains(e.target)) closeList();
+  }, true);
+
+  renderOptions('');
+}
+
+function karDDValue(id) {
+  const el = document.getElementById(id + '_wrap');
+  if(!el) return '';
+  return el.querySelector('.kar-dd-input').dataset.value || '';
+}
+function karDDReset(id) {
+  const el = document.getElementById(id + '_wrap');
+  if(!el) return;
+  const inp = el.querySelector('.kar-dd-input');
+  inp.value = '';
+  inp.dataset.value = '';
+  inp.classList.remove('has-value');
+}
+function karDDHtml(id, options, placeholder) {
+  return `<div class="kar-dd-wrap" id="${id}_wrap">
+    <input type="text" class="kar-dd-input" placeholder="${placeholder}" autocomplete="off" spellcheck="false">
+    <div class="kar-dd-list"></div>
+  </div>`;
+}
+
+// ===== KARYAWAN (MASTER DATA KARYAWAN) =====
+// Kolom baru di Supabase — jalankan SQL ini:
+// ALTER TABLE karyawan
+//   ADD COLUMN IF NOT EXISTS bagian text default '',
+//   ADD COLUMN IF NOT EXISTS unit text default '',
+//   ADD COLUMN IF NOT EXISTS jabatan text default '',
+//   ADD COLUMN IF NOT EXISTS tanggal_masuk date;
+
+let karCache = [];
 let karSearchQ = '';
 
-// --- Render shell tab ---
 function renderAdminKaryawan() {
   const el = document.getElementById('adminTabKaryawan');
   el.innerHTML = `
     <div class="kar-section-title">📋 Master Data Karyawan</div>
     <div id="karStatus" class="kar-status"></div>
 
-    <!-- Upload Excel -->
     <div style="margin-bottom:10px;">
       <button class="kar-upload-btn" onclick="karToggleUpload()">📂 Upload Excel Karyawan</button>
     </div>
     <div class="kar-upload-area" id="karUploadArea">
       <input type="file" id="karFileInput" accept=".xlsx,.xls" onchange="karHandleFile(event)">
       <div style="font-size:1.6rem;margin-bottom:6px;">📊</div>
-      <div style="font-size:.83rem;color:#555;">
+      <div style="font-size:.78rem;color:#555;line-height:1.6;">
         Klik atau drag &amp; drop file Excel<br>
-        <strong style="color:#27AE60;">.xlsx / .xls</strong> — kolom A = Nama, kolom B = Unit/Dept (opsional)
+        <strong style="color:#27AE60;">.xlsx / .xls</strong><br>
+        Urutan kolom: <strong>A=Nama, B=Bagian, C=Unit, D=Jabatan, E=Tgl Masuk (YYYY-MM-DD)</strong>
       </div>
     </div>
 
     <div class="kar-divider"></div>
 
-    <!-- Tambah manual -->
     <div class="kar-section-title">➕ Tambah Karyawan</div>
-    <div class="kar-add-wrap">
-      <input type="text" id="karNamaInput" placeholder="Nama lengkap karyawan..." onkeydown="if(event.key==='Enter')karAddManual()">
-      <input type="text" id="karDeptInput" placeholder="Unit/Dept (opsional)" style="max-width:130px;" onkeydown="if(event.key==='Enter')karAddManual()">
-      <button onclick="karAddManual()">+ Tambah</button>
+    <div class="kar-form-grid">
+      <input class="full-col" type="text" id="karNamaInput" placeholder="Nama lengkap karyawan *">
+      ${karDDHtml('karBagian', KAR_BAGIAN, 'Pilih Bagian *')}
+      ${karDDHtml('karUnit', KAR_UNIT, 'Pilih Unit *')}
+      ${karDDHtml('karJabatan', KAR_JABATAN, 'Pilih Jabatan *')}
+      <input type="date" id="karTglMasukInput">
     </div>
+    <button class="kar-form-submit" onclick="karAddManual()">+ Tambah Karyawan</button>
 
     <div class="kar-divider"></div>
 
-    <!-- Search & list -->
     <div class="kar-section-title">👥 Daftar Karyawan Aktif</div>
     <div class="kar-toolbar">
       <div class="kar-search-wrap">
         <span class="kar-search-icon">🔍</span>
-        <input type="text" id="karSearchInput" placeholder="Cari nama atau unit..." oninput="karSearch(this.value)">
+        <input type="text" id="karSearchInput" placeholder="Cari nama, bagian, unit, jabatan..." oninput="karSearch(this.value)">
       </div>
       <div class="kar-count-badge" id="karCountBadge">…</div>
     </div>
@@ -2777,7 +3079,6 @@ function renderAdminKaryawan() {
     </div>
   `;
 
-  // Drag & drop
   const area = document.getElementById('karUploadArea');
   area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
   area.addEventListener('dragleave', () => area.classList.remove('dragover'));
@@ -2789,16 +3090,19 @@ function renderAdminKaryawan() {
 
   karSearchQ = '';
   karLoadFromDB();
+
+  // Load master referensi dari Supabase, lalu init dropdown
+  loadMasterReferensi().then(() => {
+    karDropdown('karBagian',  KAR_BAGIAN,  'Pilih Bagian *');
+    karDropdown('karUnit',    KAR_UNIT,    'Pilih Unit *');
+    karDropdown('karJabatan', KAR_JABATAN, 'Pilih Jabatan *');
+  });
 }
 
-// --- Load semua karyawan aktif dari Supabase ---
 async function karLoadFromDB() {
-  if(!sbReady()) {
-    karShowStatus('error','⚠️ Supabase belum dikonfigurasi.');
-    return;
-  }
+  if(!sbReady()) { karShowStatus('error','⚠️ Supabase belum dikonfigurasi.'); return; }
   try {
-    const rows = await sbFetch('karyawan?select=id,nama,dept,aktif&aktif=eq.true&order=nama.asc');
+    const rows = await sbFetch('karyawan?select=id,nama,bagian,unit,jabatan,tanggal_masuk,aktif&aktif=eq.true&order=nama.asc');
     karCache = rows || [];
     karRenderList();
   } catch(err) {
@@ -2808,64 +3112,49 @@ async function karLoadFromDB() {
   }
 }
 
-// --- Toggle area upload ---
 function karToggleUpload() {
-  const area = document.getElementById('karUploadArea');
-  area.classList.toggle('show');
+  document.getElementById('karUploadArea').classList.toggle('show');
 }
 
-// --- File input handler ---
 function karHandleFile(e) {
   const f = e.target.files[0];
   if(f) karProcessFile(f);
 }
 
-// --- Proses upload Excel → batch insert Supabase ---
 function karProcessFile(file) {
-  if(!window.XLSX) {
-    karShowStatus('error','❌ Library Excel belum dimuat. Refresh dan coba lagi.');
-    return;
-  }
+  if(!window.XLSX) { karShowStatus('error','❌ Library Excel belum dimuat.'); return; }
   if(!sbReady()) { karShowStatus('error','⚠️ Supabase belum dikonfigurasi.'); return; }
-
   karShowStatus('loading','⏳ Membaca file Excel…');
   const reader = new FileReader();
-  reader.onload = async function(e) {
+  reader.onload = async function(ev) {
     try {
-      const wb   = XLSX.read(e.target.result, {type:'array'});
+      const wb   = XLSX.read(ev.target.result, {type:'array'});
       const ws   = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
-
-      // Ambil nama yang sudah ada di DB (case-insensitive)
       const existingNames = karCache.map(k => k.nama.toLowerCase());
-
       const toInsert = [];
       let skipped = 0;
       rows.forEach(r => {
-        const nama = String(r[0]||'').trim();
-        const dept = String(r[1]||'').trim();
+        const nama      = String(r[0]||'').trim();
+        const bagian    = String(r[1]||'').trim();
+        const unit      = String(r[2]||'').trim();
+        const jabatan   = String(r[3]||'').trim();
+        const tgl_masuk = String(r[4]||'').trim() || null;
         if(nama.length < 2) return;
         if(existingNames.includes(nama.toLowerCase())) { skipped++; return; }
-        toInsert.push({ nama, dept, aktif: true });
-        existingNames.push(nama.toLowerCase()); // hindari duplikat dalam batch yang sama
+        toInsert.push({ nama, bagian, unit, jabatan, tanggal_masuk: tgl_masuk, aktif: true });
+        existingNames.push(nama.toLowerCase());
       });
-
       if(toInsert.length === 0) {
-        karShowStatus('error', `⚠️ Semua nama sudah ada di daftar (${skipped} duplikat).`);
+        karShowStatus('error', `⚠️ Semua nama sudah ada (${skipped} duplikat).`);
         return;
       }
-
-      karShowStatus('loading', `⏳ Menyimpan ${toInsert.length} karyawan ke server…`);
-      await sbFetch('karyawan', {
-        method: 'POST',
-        body: JSON.stringify(toInsert)
-      });
-
+      karShowStatus('loading', `⏳ Menyimpan ${toInsert.length} karyawan…`);
+      await sbFetch('karyawan', { method:'POST', body: JSON.stringify(toInsert) });
       karShowStatus('success', `✅ ${toInsert.length} karyawan ditambahkan, ${skipped} duplikat diabaikan.`);
       document.getElementById('karFileInput').value = '';
       document.getElementById('karUploadArea').classList.remove('show');
       await karLoadFromDB();
-
     } catch(err) {
       karShowStatus('error','❌ Gagal upload: ' + err.message);
     }
@@ -2873,28 +3162,32 @@ function karProcessFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
-// --- Tambah manual satu per satu ---
 async function karAddManual() {
-  const namaEl = document.getElementById('karNamaInput');
-  const deptEl = document.getElementById('karDeptInput');
-  const nama   = namaEl.value.trim();
-  const dept   = deptEl.value.trim();
-  if(!nama) { karShowStatus('error','❌ Nama tidak boleh kosong.'); return; }
+  const nama      = document.getElementById('karNamaInput').value.trim();
+  const bagian    = karDDValue('karBagian');
+  const unit      = karDDValue('karUnit');
+  const jabatan   = karDDValue('karJabatan');
+  const tgl_masuk = document.getElementById('karTglMasukInput').value || null;
+  if(!nama)     { karShowStatus('error','❌ Nama wajib diisi.'); return; }
+  if(!bagian)   { karShowStatus('error','❌ Bagian wajib dipilih.'); return; }
+  if(!unit)     { karShowStatus('error','❌ Unit wajib dipilih.'); return; }
+  if(!jabatan)  { karShowStatus('error','❌ Jabatan wajib dipilih.'); return; }
+  if(!tgl_masuk){ karShowStatus('error','❌ Tanggal masuk wajib diisi.'); return; }
   if(!sbReady()) { karShowStatus('error','⚠️ Supabase belum dikonfigurasi.'); return; }
-
-  // Cek duplikat di cache
   const exists = karCache.find(k => k.nama.toLowerCase() === nama.toLowerCase());
   if(exists) { karShowStatus('error',`⚠️ "${nama}" sudah ada di daftar aktif.`); return; }
-
   try {
     karShowStatus('loading','⏳ Menyimpan…');
     await sbFetch('karyawan', {
       method: 'POST',
-      body: JSON.stringify({ nama, dept, aktif: true })
+      body: JSON.stringify({ nama, bagian, unit, jabatan, tanggal_masuk: tgl_masuk, aktif: true })
     });
-    namaEl.value = '';
-    deptEl.value = '';
-    namaEl.focus();
+    document.getElementById('karNamaInput').value = '';
+    document.getElementById('karTglMasukInput').value = '';
+    karDDReset('karBagian');
+    karDDReset('karUnit');
+    karDDReset('karJabatan');
+    document.getElementById('karNamaInput').focus();
     karShowStatus('success', `✅ "${nama}" berhasil ditambahkan.`);
     await karLoadFromDB();
   } catch(err) {
@@ -2902,27 +3195,24 @@ async function karAddManual() {
   }
 }
 
-// --- Filter pencarian ---
 function karSearch(q) {
   karSearchQ = q.toLowerCase();
   karRenderList();
 }
 
-// --- Render daftar dari cache ---
 function karRenderList() {
   const listEl  = document.getElementById('karListWrap');
   const countEl = document.getElementById('karCountBadge');
   if(!listEl) return;
-
-  const all = karCache; // sudah difilter aktif=true saat load
+  const all = karCache;
   const filtered = karSearchQ
     ? all.filter(k =>
         k.nama.toLowerCase().includes(karSearchQ) ||
-        (k.dept||'').toLowerCase().includes(karSearchQ))
+        (k.bagian||'').toLowerCase().includes(karSearchQ) ||
+        (k.unit||'').toLowerCase().includes(karSearchQ) ||
+        (k.jabatan||'').toLowerCase().includes(karSearchQ))
     : all;
-
   if(countEl) countEl.textContent = all.length + ' karyawan';
-
   if(all.length === 0) {
     listEl.innerHTML = '<div class="kar-empty">Belum ada data karyawan.<br>Upload Excel atau tambah manual.</div>';
     return;
@@ -2931,32 +3221,36 @@ function karRenderList() {
     listEl.innerHTML = '<div class="kar-empty">Tidak ditemukan karyawan dengan kata kunci tersebut.</div>';
     return;
   }
-
+  const fmtTgl = (d) => {
+    if(!d) return '';
+    const p = d.split('-');
+    const bln = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+    return `${p[2]} ${bln[parseInt(p[1])-1]} ${p[0]}`;
+  };
   listEl.innerHTML = filtered.map((k, i) => `
     <div class="kar-item">
       <span class="kar-item-num">${i+1}.</span>
       <div class="kar-item-name">
-        <div>${escHtml(k.nama)}</div>
-        ${k.dept ? `<div class="kar-item-dept">${escHtml(k.dept)}</div>` : ''}
+        <div style="font-weight:600;">${escHtml(k.nama)}</div>
+        <div class="kar-item-dept">${escHtml(k.jabatan||'')}${k.jabatan && k.bagian ? ' · ' : ''}${escHtml(k.bagian||'')}</div>
+        <div class="kar-item-meta">
+          ${k.unit ? `<span class="kar-meta-chip">🏥 ${escHtml(k.unit)}</span>` : ''}
+          ${k.tanggal_masuk ? `<span class="kar-meta-chip">📅 Masuk ${fmtTgl(k.tanggal_masuk)}</span>` : ''}
+        </div>
       </div>
       <button class="kar-resign-btn" onclick="karResign(${k.id},'${escAttr(k.nama)}')">✕ Resign</button>
     </div>
   `).join('');
 }
 
-// --- Resign: set aktif=false + tanggal_resign di Supabase ---
 async function karResign(id, nama) {
   if(!confirm(`Keluarkan "${nama}" dari daftar karyawan aktif?\n\nData tidak dihapus — hanya ditandai resign.`)) return;
   if(!sbReady()) { karShowStatus('error','⚠️ Supabase belum dikonfigurasi.'); return; }
-
   try {
     karShowStatus('loading','⏳ Memproses resign…');
     await sbFetch('karyawan?id=eq.' + id, {
       method: 'PATCH',
-      body: JSON.stringify({
-        aktif: false,
-        tanggal_resign: new Date().toISOString().split('T')[0]
-      })
+      body: JSON.stringify({ aktif: false, tanggal_resign: new Date().toISOString().split('T')[0] })
     });
     karShowStatus('success', `✅ "${nama}" telah dikeluarkan dari daftar aktif.`);
     await karLoadFromDB();
@@ -2965,7 +3259,6 @@ async function karResign(id, nama) {
   }
 }
 
-// --- Status helper ---
 function karShowStatus(type, msg) {
   const el = document.getElementById('karStatus');
   if(!el) return;
@@ -2975,27 +3268,118 @@ function karShowStatus(type, msg) {
   if(type === 'success') setTimeout(()=>{ el.style.display='none'; }, 4000);
 }
 
-// --- Download Excel dari cache ---
 function karDownload() {
   const list = karCache;
   if(list.length === 0) { alert('Belum ada data karyawan untuk didownload.'); return; }
-
   if(window.XLSX) {
-    const wsData = [['No','Nama','Unit/Dept'], ...list.map((k,i)=>[i+1, k.nama, k.dept||''])];
+    const wsData = [
+      ['No','Nama','Bagian','Unit','Jabatan','Tanggal Masuk'],
+      ...list.map((k,i) => [i+1, k.nama, k.bagian||'', k.unit||'', k.jabatan||'', k.tanggal_masuk||''])
+    ];
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!cols'] = [{wch:5},{wch:35},{wch:20}];
+    ws['!cols'] = [{wch:5},{wch:35},{wch:20},{wch:20},{wch:25},{wch:15}];
     XLSX.utils.book_append_sheet(wb, ws, 'Karyawan');
     XLSX.writeFile(wb, 'Master_Karyawan_DKH_' + new Date().toISOString().split('T')[0] + '.xlsx');
   } else {
-    let csv = 'No,Nama,Unit/Dept\n';
-    list.forEach((k,i) => { csv += (i+1) + ',"' + k.nama + '","' + (k.dept||'') + '"\n'; });
+    let csv = 'No,Nama,Bagian,Unit,Jabatan,Tanggal Masuk\n';
+    list.forEach((k,i) => {
+      csv += `${i+1},"${k.nama}","${k.bagian||''}","${k.unit||''}","${k.jabatan||''}","${k.tanggal_masuk||''}"\n`;
+    });
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'Master_Karyawan_DKH.csv';
     a.click();
   }
+}
+
+// ===== MASTER REFERENSI (Bagian / Unit / Jabatan) =====
+async function renderAdminReferensi() {
+  const el = document.getElementById('adminTabReferensi');
+  el.innerHTML = '<div style="padding:16px;color:#888;font-size:.85rem;">⏳ Memuat data referensi…</div>';
+  if (!sbReady()) {
+    el.innerHTML = '<div style="padding:16px;color:#e53935;font-size:.85rem;">⚠️ Supabase belum dikonfigurasi.</div>';
+    return;
+  }
+  await loadMasterReferensi();
+  refRender();
+}
+
+function refRender() {
+  const el = document.getElementById('adminTabReferensi');
+  if (!el) return;
+  const categories = [
+    { key: 'bagian',  label: 'Bagian',  data: KAR_BAGIAN  },
+    { key: 'unit',    label: 'Unit',    data: KAR_UNIT    },
+    { key: 'jabatan', label: 'Jabatan', data: KAR_JABATAN },
+  ];
+  el.innerHTML = `
+    <div style="margin-bottom:12px;padding:10px 14px;background:#e8f5e9;border-radius:10px;font-size:12px;color:#2e7d32;line-height:1.5;">
+      ✅ Data <strong>Bagian, Unit, dan Jabatan</strong> disimpan di Supabase tabel <code>master_referensi</code> — semua admin melihat data yang sama.
+    </div>
+    ${categories.map(c => `
+      <div style="margin-bottom:18px;border:1.5px solid #eee;border-radius:12px;overflow:hidden;">
+        <div style="background:#f5f5f5;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <strong style="font-size:.9rem;color:#333;">🏷 ${c.label} <span style="font-weight:400;color:#888;font-size:.8rem;">(${c.data.length} item)</span></strong>
+          <button onclick="refShowAdd('${c.key}')" style="background:#27AE60;color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:.78rem;cursor:pointer;">+ Tambah</button>
+        </div>
+        <div id="refAddForm_${c.key}" style="display:none;padding:10px 14px;background:#f9fff9;border-bottom:1px solid #eee;">
+          <div style="display:flex;gap:8px;">
+            <input id="refAddInput_${c.key}" type="text" placeholder="Nama ${c.label} baru..." style="flex:1;padding:7px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:.85rem;outline:none;">
+            <button onclick="refAdd('${c.key}')" style="background:#27AE60;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:.82rem;cursor:pointer;">✓ Simpan</button>
+            <button onclick="refHideAdd('${c.key}')" style="background:#eee;color:#555;border:none;border-radius:7px;padding:7px 10px;font-size:.82rem;cursor:pointer;">✕</button>
+          </div>
+        </div>
+        <div style="max-height:220px;overflow-y:auto;">
+          ${c.data.map((item, i) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid #f5f5f5;font-size:.83rem;color:#333;">
+              <span style="color:#bbb;min-width:22px;font-size:.75rem;">${i+1}.</span>
+              <span style="flex:1;">${escHtml(item)}</span>
+              <button onclick="refDelete('${c.key}','${escAttr(item)}')" style="background:none;border:1px solid #ffcdd2;color:#e53935;border-radius:5px;padding:2px 8px;font-size:.72rem;cursor:pointer;">✕</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function refShowAdd(jenis) {
+  document.getElementById('refAddForm_' + jenis).style.display = 'block';
+  document.getElementById('refAddInput_' + jenis).focus();
+}
+function refHideAdd(jenis) {
+  document.getElementById('refAddForm_' + jenis).style.display = 'none';
+  document.getElementById('refAddInput_' + jenis).value = '';
+}
+
+async function refAdd(jenis) {
+  const inp = document.getElementById('refAddInput_' + jenis);
+  const nama = inp.value.trim().toUpperCase();
+  if (!nama) return;
+  // Cek duplikat di list lokal
+  const list = jenis==='bagian' ? KAR_BAGIAN : jenis==='unit' ? KAR_UNIT : KAR_JABATAN;
+  if (list.includes(nama)) { alert(`"${nama}" sudah ada di daftar ${jenis}.`); return; }
+  try {
+    await sbFetch('master_referensi', { method: 'POST', body: JSON.stringify({ jenis, nama }) });
+    list.push(nama);
+    list.sort();
+    inp.value = '';
+    refHideAdd(jenis);
+    refRender();
+  } catch(e) { alert('Gagal menyimpan: ' + e.message); }
+}
+
+async function refDelete(jenis, nama) {
+  if (!confirm(`Hapus "${nama}" dari daftar ${jenis}?`)) return;
+  try {
+    await sbFetch('master_referensi?jenis=eq.' + encodeURIComponent(jenis) + '&nama=eq.' + encodeURIComponent(nama), { method: 'DELETE' });
+    const list = jenis==='bagian' ? KAR_BAGIAN : jenis==='unit' ? KAR_UNIT : KAR_JABATAN;
+    const idx = list.indexOf(nama);
+    if (idx > -1) list.splice(idx, 1);
+    refRender();
+  } catch(e) { alert('Gagal hapus: ' + e.message); }
 }
 
 // Init
